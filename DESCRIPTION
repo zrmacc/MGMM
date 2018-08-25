@@ -1,0 +1,24 @@
+Package: MNMix
+Title: Multivariate Normal Mixture Models
+Version: 0.1.0
+Authors@R: person("Zachary", "McCaw", email = "zmccaw@g.harvard.edu", role = c("aut", "cre"))
+Description: Parameter estimation for multivariate normal mixture models with one or more
+	components, and arbitrary patterns of missingness, provided the data are missing at random.
+Depends: R (>= 3.4.3)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+LinkingTo:
+	Rcpp,
+	RcppEigen
+Imports:
+	foreach,
+	methods, 
+	mvnfast,
+	plyr,
+	Rcpp,
+	stats
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
