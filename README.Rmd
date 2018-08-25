@@ -1,0 +1,12 @@
+---
+title: "README"
+author: "Zachary McCaw"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    keep_md: TRUE
+--- 
+
+# Package Vignette
+```{r,child='vignettes/MNMix.Rmd'}
+```
