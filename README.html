@@ -147,14 +147,16 @@ $(document).ready(function () {
 <h2>Model</h2>
 <p>Suppose that the data consist of random vectors <span class="math inline">\(y_{i}\)</span> in <span class="math inline">\(\mathbb{R}^{p}\)</span>. Each observation belongs to one of <span class="math inline">\(k\)</span> clusters. Let <span class="math inline">\(z_{i}\in\{1,\cdots,k\}\)</span> denote the cluster to which <span class="math inline">\(y_{i}\)</span> belongs. The marginal probability of membership the <span class="math inline">\(j\)</span>th cluster is <span class="math inline">\(\pi_{j} = P[z_{i}=j]\)</span>. Conditional on membership to cluster <span class="math inline">\(j\)</span>, <span class="math inline">\(z_{i}\)</span> follows a multivariate normal distribution with mean <span class="math inline">\(\mu_{j}\)</span> and covariance <span class="math inline">\(\Sigma_{j}\)</span>. The generative model is:</p>
 <p><span class="math display">\[
-z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}] \\
+z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
+\]</span></p>
+<p><span class="math display">\[
 y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
 \]</span></p>
 <p>The EM algorithm is used to obtain maximum likelihood estimates of the model parameters. Posterior probabilities of cluster membership are calculated as follows. Partition each observation <span class="math inline">\(y_{i}\)</span> as <span class="math inline">\((s_{i},\ t_{i})\)</span>, where <span class="math inline">\(s_{i}\)</span> denotes the observed elements, and <span class="math inline">\(t_{i}\)</span> the missing elements. The posterior probability of membership to cluster <span class="math inline">\(j\)</span>, given the observed data <span class="math inline">\(s_{i}\)</span>, is:</p>
 <p><span class="math display">\[
-\gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\mu_{l},\Sigma_{l})\pi_{l}}
+\gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
 \]</span></p>
-<p>The estimated responsibility <span class="math inline">\(\hat{\gamma}_{ij}\)</span> of the <span class="math inline">\(j\)</span>th cluster for the <span class="math inline">\(i\)</span>th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation <span class="math inline">\(y_{i}\)</span> is:</p>
+<p>The estimated responsibility of the <span class="math inline">\(j\)</span>th cluster for the <span class="math inline">\(i\)</span>th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation <span class="math inline">\(y_{i}\)</span> is:</p>
 <p><span class="math display">\[
 \hat{z}_{i} = \arg\max_{j}\ \hat{\gamma}_{ij}
 \]</span></p>
@@ -220,12 +222,12 @@ show(M);</code></pre>
 <pre><code>## Estimated Mean and Covariance:
 ## $Mean
 ##       y1       y2 
-## 1.936063 2.008668 
+## 2.050852 2.012795 
 ## 
 ## $Covariance
 ##           y1        y2
-## y1 0.9188291 0.4798521
-## y2 0.4798521 0.9435685</code></pre>
+## y1 0.9965648 0.5194510
+## y2 0.5194510 0.9747743</code></pre>
 </div>
 <div id="single-component-with-missingness-1" class="section level3">
 <h3>Single Component with Missingness</h3>

@@ -31,17 +31,20 @@ Suppose that the data consists of multivariate normal random vectors. Each obser
 Suppose that the data consist of random vectors $y_{i}$ in $\mathbb{R}^{p}$. Each observation belongs to one of $k$ clusters. Let $z_{i}\in\{1,\cdots,k\}$ denote the cluster to which $y_{i}$ belongs. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{i}=j]$. Conditional on membership to cluster $j$, $z_{i}$ follows a multivariate normal distribution with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
 
 $$
-z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}] \\
+z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
+$$
+
+$$
 y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
 $$
 
 The EM algorithm is used to obtain maximum likelihood estimates of the model parameters. Posterior probabilities of cluster membership are calculated as follows. Partition each observation $y_{i}$ as $(s_{i},\ t_{i})$, where $s_{i}$ denotes the observed elements, and $t_{i}$ the missing elements. The posterior probability of membership to cluster $j$, given the observed data $s_{i}$, is:
 
 $$
-\gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\mu_{l},\Sigma_{l})\pi_{l}}
+\gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
 $$
 
-The estimated responsibility $\hat{\gamma}_{ij}$ of the $j$th cluster for the $i$th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation $y_{i}$ is:
+The estimated responsibility of the $j$th cluster for the $i$th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation $y_{i}$ is:
 
 $$
 \hat{z}_{i} = \arg\max_{j}\ \hat{\gamma}_{ij}
