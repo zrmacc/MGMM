@@ -1,11 +1,9 @@
-########################
-# For Mixtures
-########################
+# Purpose: Define custom classes
+# Updated: 19/01/15
 
 #' Mixture Model Class
 #'
-#' Defines the class returned by functions that 
-#' fit mixture models. 
+#' Defines the class returned by the fitting functions. 
 #'
 #' @slot Components Components.
 #' @slot Means Fitted cluster means.
@@ -45,7 +43,7 @@ print.mix = function(x,...){
   cat("\n");
 }
 
-#' Show for Fitted Survival Models
+#' Show for Fitted Mixture Models
 #' @param object A \code{mix} object.
 #' @rdname mix-method
 #' @importFrom methods show

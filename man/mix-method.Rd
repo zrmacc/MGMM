@@ -3,7 +3,7 @@
 \docType{methods}
 \name{show,mix-method}
 \alias{show,mix-method}
-\title{Show for Fitted Survival Models}
+\title{Show for Fitted Mixture Models}
 \usage{
 \S4method{show}{mix}(object)
 }
@@ -11,5 +11,5 @@
 \item{object}{A \code{mix} object.}
 }
 \description{
-Show for Fitted Survival Models
+Show for Fitted Mixture Models
 }

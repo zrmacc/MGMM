@@ -5,8 +5,7 @@
 \alias{mix-class}
 \title{Mixture Model Class}
 \description{
-Defines the class returned by functions that 
-fit mixture models.
+Defines the class returned by the fitting functions.
 }
 \section{Slots}{
 

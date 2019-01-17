@@ -1,18 +1,11 @@
-# Purpose: Master estimation function for MNMixture
-# Updated: 180824
-
-#' @useDynLib MNMix
-#' @importFrom Rcpp sourceCpp
-NULL
+# Purpose: Master estimation function for MNMix
+# Updated: 19/01/17
 
 #' Estimate Multivariate Normal Mixture
 #' 
 #' Given an \eqn{n \times d} matrix of random vectors, estimates the parameters
-#' of a multivariate normal mixture model. Accommodates arbitrary patterns of
-#' missingness, provided the elements are missing at random (MAR). Here, MAR
-#' entails that whether or not an element is observed is conditionally
-#' independent of that element's value, given the observed elements. The number
-#' of mixture components is specified using \code{k}.
+#' of a Gaussian Mixture Model (GMM). Accommodates arbitrary patterns of missingness
+#' at random (MAR) in the input vectors.
 #' 
 #' Initial values for the cluster means, covariances, and proportions are
 #' specified using \code{M0}, \code{S0}, and \code{pi0}, respectively. If the
@@ -36,8 +29,12 @@ NULL
 #'   multi-component model \eqn{k>1}, an object of class \code{mix}, containing
 #'   the estimated means, covariances, cluster proportions, cluster
 #'   responsibilities, and observation assignments.
+#' 
 #' @export
+#' @seealso For data generation, see \code{\link{rMNMix}}.
+#' 
 #' @examples 
+#' \dontrun{
 #' # Single component without missingness
 #' # Bivariate normal observations
 #' Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
@@ -60,14 +57,16 @@ NULL
 #' 
 #' # Four components with missingness
 #' # Bivariate normal observations
+#' # Note: Fitting is slow. 
 #' M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 #' S = 0.5*diag(2);
 #' Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
 #' M = fit.MNMix(Y=Y,k=4);
+#' }
 
 fit.MNMix = function(Y,k=1,M0,S0,pi0,maxit=100,eps=1e-6,report=T,parallel=F){
   ## Check data
-  if(!is.matrix(Y)){stop("Provide a numeric matrix with observations as rows for Y.")};
+  if(!is.matrix(Y)){stop("A numeric matrix with observations as rows is expected for Y.")};
   d = ncol(Y);
   ## Check initial values
   # Mean vectors

@@ -1,10 +1,10 @@
 ---
-title: "Multivariate Normal Mixture Models"
+title: "Gaussian Mixture Models with Missingness"
 author: "Zachary McCaw"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Multivariate Normal Mixture Models}
+  %\VignetteIndexEntry{Gaussian Mixture Models with Missingness}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,11 +24,11 @@ library(MNMix);
 
 ## Overview
 
-Suppose that the data consists of multivariate normal random vectors. Each observation is thought to arise from one of several distinct clusters. The collection of observations belonging to a given cluster follow a multivariate normal distribution, with cluster-specific means and covariances. The elements of an observation are subject to arbitrary patterns of missingness. However, whether or not an element is missing is taken as independent of that element’s value, given the observed elements. Provided such data, and the number of clusters in the population, this package estimates the cluster-specific means, covariances, and marginal membership probabilities. In addition, for each observation, the posterior probability of membership is calculated for all clusters. A classification of the observation into the cluster with the highest posterior probability is provided. 
+Suppose that the data consist of independent random vectors. Each observation belongs to one of several distinct clusters. Conditional on cluster membership, the observation follows a multivariate normal distribution, with cluster-specific mean and covariance. The elements of an observation are subject to arbitrary patterns of missingness at random. Given such data, this package estimates the parameters of a Gaussian Mixture Model (GMM), including the marginal probabilities of cluster membership, and the cluster-specific means and covariances. For each observation, the posterior probabiity of membership to each cluster is calculated, and a maximum a posteriori classification is provided. 
 
 ## Model
 
-Suppose that the data consist of random vectors $y_{i}$ in $\mathbb{R}^{p}$. Each observation belongs to one of $k$ clusters. Let $z_{i}\in\{1,\cdots,k\}$ denote the cluster to which $y_{i}$ belongs. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{i}=j]$. Conditional on membership to cluster $j$, $z_{i}$ follows a multivariate normal distribution with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
+Suppose that the data consist of $n$ random vectors $y_{i}$ in $\mathbb{R}^{p}$. Each observation arises from one of $k$ distinct clusters. Let $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{i}=j]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
 
 $$
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
@@ -38,23 +38,23 @@ $$
 y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
 $$
 
-The EM algorithm is used to obtain maximum likelihood estimates of the model parameters. Posterior probabilities of cluster membership are calculated as follows. Partition each observation $y_{i}$ as $(s_{i},\ t_{i})$, where $s_{i}$ denotes the observed elements, and $t_{i}$ the missing elements. The posterior probability of membership to cluster $j$, given the observed data $s_{i}$, is:
+The EM algorithm is used to obtain maximum likelihood estimates (MLEs) of the model parameters. The procedure treats both the unobserved elements of each random vector $y_{i}$, and the unobserved cluster assignments $z_{ij}$ as missing data. From the MLEs, posterior probabilities of cluster membership are calculated as follows. Partition each observation $y_{i}$ as $(s_{i},\ t_{i})$, where $s_{i}$ denotes the observed elements, and $t_{i}$ denotes the missing elements. The posterior probability of membership to cluster $j$, given the observed data $s_{i}$, is:
 
 $$
 \gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
 $$
 
-The estimated responsibility of the $j$th cluster for the $i$th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation $y_{i}$ is:
+The maximum a posteriori classificaiton for $y_{i}$ is:
 
 $$
-\hat{z}_{i} = \arg\max_{j}\ \hat{\gamma}_{ij}
+\arg\max_{j}\ \hat{\gamma}_{ij}
 $$
 
 # Data Generation
 
 ## Description
 
-The function `rMNMix` simulates observations from a mixture of multivariate normal distributions. The number of observations is specified by `n`, and the dimension of each observation by `d`. The number of clusters is set using `k`, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector `pi`, which should contain `k` elements. If $k>0$ but `pi` is omitted, the clusters are taken as equi-probable. The proportion of elements in the $n \times d$ data matrix that are missing is specified by `m`, which defaults to zero. Note that when $m>0$ it is possible for all elements of an observation to go missing. The cluster means `M` are provided as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances `S` are provided as a numeric matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype. 
+The function `rMNMix` simulates observations from a Gaussian Mixture Model. The number of observations is specified by `n`, and the dimension of each observation by `d`. The number of clusters is set using `k`, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector `pi`, which should contain `k` elements. If $k>0$ but `pi` is omitted, the clusters are taken as equi-probable. The proportion of elements in the $n \times d$ data matrix that are missing is specified by `m`, which defaults to zero. Note that when $m>0$ it is possible for all elements of an observation to go missing. The cluster means `M` are provided as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances `S` are provided as a numeric matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype. 
 
 ## Examples
 
@@ -103,7 +103,7 @@ Y = rMNMix(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
 
 ## Description
 
-The function `fit.MNMix` estimates parameters for multivariate normal mixture model. The data are expected as a numeric matrix `Y`, with observations as rows. The number of mixture components is specified using `k`, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using `M0`, `S0`, and `pi0`, respectively. If the data `Y` contain complete observations, i.e. observations with no missing elements, `fit.MNMix` will attempt to initialize the model parameters ($\mu,\Sigma,\pi$) via K-means. However, if the data `Y` contain no complete observations, then initial values are required for each of `M0`, `S0`, and `pi0`. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means `M0` are provided as a list of vectors, the covariances `S0` as a list of matrices, and the cluster proportions `pi0` as a numeric vector. Note that `M0` and `S0` are expected as lists even if the model only contains a single component `k=1`.
+The function `fit.MNMix` estimates parameters for the Gaussian Mixture Model. The data are expected as a numeric matrix `Y`, with observations as rows. The number of mixture components is specified using `k`, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using `M0`, `S0`, and `pi0`, respectively. If the data `Y` contain complete observations, i.e. observations with no missing elements, `fit.MNMix` will attempt to initialize the model parameters ($\mu,\Sigma,\pi$) via K-means. However, if the data `Y` contain no complete observations, then initial values are required for each of `M0`, `S0`, and `pi0`. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means `M0` are provided as a list of vectors, the covariances `S0` as a list of matrices, and the cluster proportions `pi0` as a numeric vector. Note that `M0` and `S0` are expected as lists even if the model only contains a single component `k=1`.
 
 The arguments `maxit`, `eps`, `report`, and `parallel` control the fitting procedure. `maxit` sets the maximum number of EM iterations to attempt. The default is $10^{2}$. `eps` sets the minimum acceptable improvement in the EM objective function. The default is $10^{-6}$. If `report=TRUE`, then fitting progress is displayed. For models with missingness and more than one mixture component `k>1`, setting `parallel=TRUE` may improve run time. The parallel backend must be registered beforehand. 
 

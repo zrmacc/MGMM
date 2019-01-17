@@ -1,7 +1,7 @@
 ---
 title: "README"
 author: "Zachary McCaw"
-date: "2018-08-25"
+date: "2019-01-18"
 output: 
   html_document: 
     keep_md: TRUE
@@ -22,11 +22,11 @@ output:
 
 ## Overview
 
-Suppose that the data consists of multivariate normal random vectors. Each observation is thought to arise from one of several distinct clusters. The collection of observations belonging to a given cluster follow a multivariate normal distribution, with cluster-specific means and covariances. The elements of an observation are subject to arbitrary patterns of missingness. However, whether or not an element is missing is taken as independent of that element’s value, given the observed elements. Provided such data, and the number of clusters in the population, this package estimates the cluster-specific means, covariances, and marginal membership probabilities. In addition, for each observation, the posterior probability of membership is calculated for all clusters. A classification of the observation into the cluster with the highest posterior probability is provided. 
+Suppose that the data consist of independent random vectors. Each observation belongs to one of several distinct clusters. Conditional on cluster membership, the observation follows a multivariate normal distribution, with cluster-specific mean and covariance. The elements of an observation are subject to arbitrary patterns of missingness at random. Given such data, this package estimates the parameters of a Gaussian Mixture Model (GMM), including the marginal probabilities of cluster membership, and the cluster-specific means and covariances. For each observation, the posterior probabiity of membership to each cluster is calculated, and a maximum a posteriori classification is provided. 
 
 ## Model
 
-Suppose that the data consist of random vectors $y_{i}$ in $\mathbb{R}^{p}$. Each observation belongs to one of $k$ clusters. Let $z_{i}\in\{1,\cdots,k\}$ denote the cluster to which $y_{i}$ belongs. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{i}=j]$. Conditional on membership to cluster $j$, $z_{i}$ follows a multivariate normal distribution with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
+Suppose that the data consist of $n$ random vectors $y_{i}$ in $\mathbb{R}^{p}$. Each observation arises from one of $k$ distinct clusters. Let $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{i}=j]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
 
 $$
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
@@ -36,23 +36,23 @@ $$
 y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
 $$
 
-The EM algorithm is used to obtain maximum likelihood estimates of the model parameters. Posterior probabilities of cluster membership are calculated as follows. Partition each observation $y_{i}$ as $(s_{i},\ t_{i})$, where $s_{i}$ denotes the observed elements, and $t_{i}$ the missing elements. The posterior probability of membership to cluster $j$, given the observed data $s_{i}$, is:
+The EM algorithm is used to obtain maximum likelihood estimates (MLEs) of the model parameters. The procedure treats both the unobserved elements of each random vector $y_{i}$, and the unobserved cluster assignments $z_{ij}$ as missing data. From the MLEs, posterior probabilities of cluster membership are calculated as follows. Partition each observation $y_{i}$ as $(s_{i},\ t_{i})$, where $s_{i}$ denotes the observed elements, and $t_{i}$ denotes the missing elements. The posterior probability of membership to cluster $j$, given the observed data $s_{i}$, is:
 
 $$
 \gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
 $$
 
-The estimated responsibility of the $j$th cluster for the $i$th observation is obtained by substituting in the MLEs. The predicted cluster membership of observation $y_{i}$ is:
+The maximum a posteriori classificaiton for $y_{i}$ is:
 
 $$
-\hat{z}_{i} = \arg\max_{j}\ \hat{\gamma}_{ij}
+\arg\max_{j}\ \hat{\gamma}_{ij}
 $$
 
 # Data Generation
 
 ## Description
 
-The function `rMNMix` simulates observations from a mixture of multivariate normal distributions. The number of observations is specified by `n`, and the dimension of each observation by `d`. The number of clusters is set using `k`, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector `pi`, which should contain `k` elements. If $k>0$ but `pi` is omitted, the clusters are taken as equi-probable. The proportion of elements in the $n \times d$ data matrix that are missing is specified by `m`, which defaults to zero. Note that when $m>0$ it is possible for all elements of an observation to go missing. The cluster means `M` are provided as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances `S` are provided as a numeric matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype. 
+The function `rMNMix` simulates observations from a Gaussian Mixture Model. The number of observations is specified by `n`, and the dimension of each observation by `d`. The number of clusters is set using `k`, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector `pi`, which should contain `k` elements. If $k>0$ but `pi` is omitted, the clusters are taken as equi-probable. The proportion of elements in the $n \times d$ data matrix that are missing is specified by `m`, which defaults to zero. Note that when $m>0$ it is possible for all elements of an observation to go missing. The cluster means `M` are provided as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances `S` are provided as a numeric matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype. 
 
 ## Examples
 
@@ -105,7 +105,7 @@ Y = rMNMix(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
 
 ## Description
 
-The function `fit.MNMix` estimates parameters for multivariate normal mixture model. The data are expected as a numeric matrix `Y`, with observations as rows. The number of mixture components is specified using `k`, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using `M0`, `S0`, and `pi0`, respectively. If the data `Y` contain complete observations, i.e. observations with no missing elements, `fit.MNMix` will attempt to initialize the model parameters ($\mu,\Sigma,\pi$) via K-means. However, if the data `Y` contain no complete observations, then initial values are required for each of `M0`, `S0`, and `pi0`. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means `M0` are provided as a list of vectors, the covariances `S0` as a list of matrices, and the cluster proportions `pi0` as a numeric vector. Note that `M0` and `S0` are expected as lists even if the model only contains a single component `k=1`.
+The function `fit.MNMix` estimates parameters for the Gaussian Mixture Model. The data are expected as a numeric matrix `Y`, with observations as rows. The number of mixture components is specified using `k`, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using `M0`, `S0`, and `pi0`, respectively. If the data `Y` contain complete observations, i.e. observations with no missing elements, `fit.MNMix` will attempt to initialize the model parameters ($\mu,\Sigma,\pi$) via K-means. However, if the data `Y` contain no complete observations, then initial values are required for each of `M0`, `S0`, and `pi0`. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means `M0` are provided as a list of vectors, the covariances `S0` as a list of matrices, and the cluster proportions `pi0` as a numeric vector. Note that `M0` and `S0` are expected as lists even if the model only contains a single component `k=1`.
 
 The arguments `maxit`, `eps`, `report`, and `parallel` control the fitting procedure. `maxit` sets the maximum number of EM iterations to attempt. The default is $10^{2}$. `eps` sets the minimum acceptable improvement in the EM objective function. The default is $10^{-6}$. If `report=TRUE`, then fitting progress is displayed. For models with missingness and more than one mixture component `k>1`, setting `parallel=TRUE` may improve run time. The parallel backend must be registered beforehand. 
 
@@ -129,12 +129,15 @@ show(M);
 ## Estimated Mean and Covariance:
 ## $Mean
 ##       y1       y2 
-## 2.050852 2.012795 
+## 1.997693 2.010779 
 ## 
 ## $Covariance
 ##           y1        y2
-## y1 0.9965648 0.5194510
-## y2 0.5194510 0.9747743
+## y1 1.0335551 0.5215485
+## y2 0.5215485 1.0504981
+## 
+## $Objective
+## [1] -1792.507
 ```
 
 ### Single Component with Missingness
@@ -162,42 +165,45 @@ M2$Objective-M1$Objective;
 
 ```
 ## Initial parameter values set internally:
-## Objective increment: 1.32
-## Objective increment: 0.0242
-## 2 update(s) performed before tolerance limit. 
+## Objective increment:  5.81 
+## Objective increment:  0.662 
+## Objective increment:  0.0976 
+## Objective increment:  0.0143 
+## Objective increment:  0.00147 
+## 5 update(s) performed before tolerance limit.
+## 
 ## 
 ## $Mean
 ##          y1          y2          y3 
-##  0.05366774 -0.03125547  0.02210157 
+##  0.05363057 -0.03032985  0.02118261 
 ## 
 ## $Covariance
-##             y1           y2          y3
-## y1  0.99206733 -0.026448480 0.014700353
-## y2 -0.02644848  1.035613830 0.007076264
-## y3  0.01470035  0.007076264 1.051829916
+##              y1            y2            y3
+## y1  0.995409482 -0.0272300548  0.0084440124
+## y2 -0.027230055  1.0377546994 -0.0008892942
+## y3  0.008444012 -0.0008892942  1.0590200651
 ## 
 ## $Objective
-## [1] -1526.005
+## [1] -3064.304
 ## 
 ## Initial parameter values set manually:
-## Objective increment: 2.99
-## 1 update(s) performed before tolerance limit. 
+## 0 update(s) performed before tolerance limit.
+## 
 ## 
 ## $Mean
-##          y1          y2          y3 
-##  0.04401760 -0.02438124  0.01684148 
+## [1] 0 0 0
 ## 
 ## $Covariance
-##              y1            y2           y3
-## y1  0.991860758 -0.0157399011 0.0067010171
-## y2 -0.015739901  1.0272907159 0.0002498111
-## y3  0.006701017  0.0002498111 1.0439131667
+##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1
 ## 
 ## $Objective
-## [1] -1518.475
+## NULL
 ## 
 ## Gain in final objective by initializing parameters at the truth:
-## [1] 7.529237
+## numeric(0)
 ```
 
 ### Two Components without Missingness
@@ -224,8 +230,32 @@ head(M@Assignments);
 ```
 
 ```
-## Objective increment: 0.198
-## 1 update(s) performed before tolerance limit. 
+## Objective increment:  0.396 
+## Objective increment:  0.034 
+## Objective increment:  0.00965 
+## Objective increment:  0.00282 
+## Objective increment:  0.000957 
+## Objective increment:  0.000395 
+## Objective increment:  0.000189 
+## Objective increment:  9.75e-05 
+## Objective increment:  5.22e-05 
+## Objective increment:  2.83e-05 
+## Objective increment:  1.54e-05 
+## Objective increment:  8.43e-06 
+## Objective increment:  4.61e-06 
+## Objective increment:  2.52e-06 
+## Objective increment:  1.38e-06 
+## Objective increment:  7.56e-07 
+## Objective increment:  4.14e-07 
+## Objective increment:  2.27e-07 
+## Objective increment:  1.24e-07 
+## Objective increment:  6.79e-08 
+## Objective increment:  3.72e-08 
+## Objective increment:  2.03e-08 
+## Objective increment:  1.11e-08 
+## Objective increment:  6.1e-09 
+## 23 update(s) performed before tolerance limit.
+## 
 ## 
 ## Normal Mixture Model with 2 Components. 
 ## Cluster Proportions:
@@ -233,48 +263,48 @@ head(M@Assignments);
 ## 0.518 0.482 
 ## 
 ## Final Objective:
-##        Q 
-## -1833.56 
+##      k1 
+## -2982.3 
 ## 
 ## Cluster means:
 ## [[1]]
 ##        y1        y2        y3 
-## -1.949637 -1.912012 -1.981330 
+## -1.949991 -1.912998 -1.982099 
 ## 
 ## [[2]]
 ##       y1       y2       y3 
-## 1.966730 1.934883 1.958164 
+## 1.964810 1.933682 1.956676 
 ## 
 ## Cluster covariances:
 ## [[1]]
 ##           y1        y2        y3
-## y1 0.9359385 0.5095797 0.4897276
-## y2 0.5095797 1.0466288 0.4919448
-## y3 0.4897276 0.4919448 0.9350531
+## y1 0.9347688 0.5095796 0.4896254
+## y2 0.5095796 1.0477300 0.4895118
+## y3 0.4896254 0.4895118 0.9365137
 ## 
 ## [[2]]
-##           y1        y2        y3
-## y1 1.0647953 0.5277063 0.5179572
-## y2 0.5277063 1.0457644 0.5274515
-## y3 0.5179572 0.5274515 0.9961200
+##          y1        y2        y3
+## y1 1.070444 0.5310510 0.5222580
+## y2 0.531051 1.0483091 0.5286882
+## y3 0.522258 0.5286882 1.0013230
 ## 
 ## Cluster responsibilities:
-##   ID           k1           k2
-## 1  1 9.997793e-01 2.206736e-04
-## 2  2 1.701449e-03 9.982986e-01
-## 3  3 9.999994e-01 5.746544e-07
-## 4  4 9.912762e-01 8.723782e-03
-## 5  5 3.309337e-05 9.999669e-01
-## 6  6 4.419866e-08 1.000000e+00
+##             k1           k2
+## 1 9.997767e-01 2.232718e-04
+## 2 1.693337e-03 9.983067e-01
+## 3 9.999994e-01 6.164588e-07
+## 4 9.910511e-01 8.948881e-03
+## 5 3.285010e-05 9.999671e-01
+## 6 4.350046e-08 1.000000e+00
 ## 
 ## Cluster assignments:
-##   ID Assignment
-## 1  1          1
-## 2  2          2
-## 3  3          1
-## 4  4          1
-## 5  5          2
-## 6  6          2
+##   Assignment
+## 1          1
+## 2          2
+## 3          1
+## 4          1
+## 5          2
+## 6          2
 ```
 
 ### Four Components with Missingness
@@ -297,53 +327,65 @@ head(M@Assignments);
 ```
 
 ```
-## Objective increment: 0.412
-## Objective increment: 1.34
-## Objective increment: 0.167
-## Objective increment: 0.0244
-## Objective increment: 0.00449
-## Objective increment: 0.001
-## Objective increment: 0.000246
-## Objective increment: 6.26e-05
-## Objective increment: 1.57e-05
-## Objective increment: 3.79e-06
-## Objective increment: 8.43e-07
-## Objective increment: 1.55e-07
-## Objective increment: 1.26e-08
-## 13 update(s) performed before tolerance limit. 
+## Objective increment:  6980 
+## Objective increment:  168 
+## Objective increment:  90.9 
+## Objective increment:  57.4 
+## Objective increment:  36.8 
+## Objective increment:  26.9 
+## Objective increment:  20.6 
+## Objective increment:  17.1 
+## Objective increment:  15.1 
+## Objective increment:  14.1 
+## Objective increment:  14.1 
+## Objective increment:  14.3 
+## Objective increment:  15.1 
+## Objective increment:  15.4 
+## Objective increment:  15 
+## Objective increment:  13.2 
+## Objective increment:  10.7 
+## Objective increment:  7.68 
+## Objective increment:  5.26 
+## Objective increment:  3.31 
+## Objective increment:  2.02 
+## Objective increment:  1.12 
+## Objective increment:  0.574 
+## Objective increment:  0.207 
+## 24 update(s) performed before tolerance limit.
+## 
 ## Normal Mixture Model with 4 Components. 
 ## Cluster Proportions:
-##    k1    k2    k3    k4 
-## 0.326 0.146 0.153 0.374 
+##     k1     k2     k3     k4 
+## 0.0863 0.3220 0.2190 0.3730 
 ## 
 ## Final Objective:
-##        Q 
-## -1570.82 
+##       k1 
+## -2649.01 
 ## 
 ## Cluster means:
 ## [[1]]
-##       y1       y2 
-## 2.046009 1.991048 
+##         y1         y2 
+## -0.9088869  0.4385624 
 ## 
 ## [[2]]
-##        y1        y2 
-## -1.895473  2.031035 
+##       y1       y2 
+## 1.994131 1.992714 
 ## 
 ## [[3]]
-##        y1        y2 
-##  2.027171 -2.094533 
+##          y1          y2 
+##  0.03938591 -0.03059968 
 ## 
 ## [[4]]
 ##        y1        y2 
-## -2.024894 -1.997215 
+## -2.038837 -2.006364 
 ## 
 ## 
 ## Cluster assignments:
-##   ID Assignment
-## 1  1          3
-## 2  2          1
-## 3  3          2
-## 4  4          2
-## 5  5          2
-## 6  6          1
+##   Assignment
+## 1          2
+## 2          3
+## 3          4
+## 4          4
+## 5          2
+## 6          2
 ```

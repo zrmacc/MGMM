@@ -6,16 +6,87 @@
 
 using namespace Rcpp;
 
-// wCov
-SEXP wCov(const Eigen::Map<Eigen::MatrixXd> Y, const Eigen::Map<Eigen::RowVectorXd> m, const Eigen::Map<Eigen::VectorXd> w);
-RcppExport SEXP _MNMix_wCov(SEXP YSEXP, SEXP mSEXP, SEXP wSEXP) {
+// cov
+SEXP cov(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B, const bool cor);
+RcppExport SEXP _MNMix_cov(SEXP ASEXP, SEXP BSEXP, SEXP corSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type B(BSEXP);
+    Rcpp::traits::input_parameter< const bool >::type cor(corSEXP);
+    rcpp_result_gen = Rcpp::wrap(cov(A, B, cor));
+    return rcpp_result_gen;
+END_RCPP
+}
+// det
+SEXP det(const Eigen::Map<Eigen::MatrixXd> A);
+RcppExport SEXP _MNMix_det(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(det(A));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matIP
+SEXP matIP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
+RcppExport SEXP _MNMix_matIP(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(matIP(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matInv
+SEXP matInv(const Eigen::Map<Eigen::MatrixXd> A);
+RcppExport SEXP _MNMix_matInv(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(matInv(A));
+    return rcpp_result_gen;
+END_RCPP
+}
+// MMP
+SEXP MMP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
+RcppExport SEXP _MNMix_MMP(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(MMP(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matOP
+SEXP matOP(const Eigen::Map<Eigen::MatrixXd> X, const Eigen::Map<Eigen::MatrixXd> Y);
+RcppExport SEXP _MNMix_matOP(SEXP XSEXP, SEXP YSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::RowVectorXd> >::type m(mSEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd> >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(wCov(Y, m, w));
+    rcpp_result_gen = Rcpp::wrap(matOP(X, Y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SchurC
+SEXP SchurC(const Eigen::Map<Eigen::MatrixXd> Ibb, const Eigen::Map<Eigen::MatrixXd> Iaa, const Eigen::Map<Eigen::MatrixXd> Iba);
+RcppExport SEXP _MNMix_SchurC(SEXP IbbSEXP, SEXP IaaSEXP, SEXP IbaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type Ibb(IbbSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type Iaa(IaaSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type Iba(IbaSEXP);
+    rcpp_result_gen = Rcpp::wrap(SchurC(Ibb, Iaa, Iba));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -30,112 +101,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// fastMMp
-SEXP fastMMp(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
-RcppExport SEXP _MNMix_fastMMp(SEXP ASEXP, SEXP BSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(fastMMp(A, B));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastT
-SEXP fastT(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_fastT(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fastT(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastIP
-SEXP fastIP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
-RcppExport SEXP _MNMix_fastIP(SEXP ASEXP, SEXP BSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(fastIP(A, B));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastInv
-SEXP fastInv(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_fastInv(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fastInv(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastDet
-SEXP fastDet(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_fastDet(SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fastDet(A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastOP
-SEXP fastOP(const Eigen::Map<Eigen::VectorXd> x, const Eigen::Map<Eigen::VectorXd> y);
-RcppExport SEXP _MNMix_fastOP(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd> >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd> >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(fastOP(x, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// fastQF
-SEXP fastQF(const Eigen::Map<Eigen::MatrixXd> X, const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_fastQF(SEXP XSEXP, SEXP ASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    rcpp_result_gen = Rcpp::wrap(fastQF(X, A));
-    return rcpp_result_gen;
-END_RCPP
-}
-// SchurC
-SEXP SchurC(const Eigen::Map<Eigen::MatrixXd> I11, const Eigen::Map<Eigen::MatrixXd> I22, const Eigen::Map<Eigen::MatrixXd> I12);
-RcppExport SEXP _MNMix_SchurC(SEXP I11SEXP, SEXP I22SEXP, SEXP I12SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type I11(I11SEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type I22(I22SEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type I12(I12SEXP);
-    rcpp_result_gen = Rcpp::wrap(SchurC(I11, I22, I12));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MNMix_wCov", (DL_FUNC) &_MNMix_wCov, 3},
-    {"_MNMix_tr", (DL_FUNC) &_MNMix_tr, 1},
-    {"_MNMix_fastMMp", (DL_FUNC) &_MNMix_fastMMp, 2},
-    {"_MNMix_fastT", (DL_FUNC) &_MNMix_fastT, 1},
-    {"_MNMix_fastIP", (DL_FUNC) &_MNMix_fastIP, 2},
-    {"_MNMix_fastInv", (DL_FUNC) &_MNMix_fastInv, 1},
-    {"_MNMix_fastDet", (DL_FUNC) &_MNMix_fastDet, 1},
-    {"_MNMix_fastOP", (DL_FUNC) &_MNMix_fastOP, 2},
-    {"_MNMix_fastQF", (DL_FUNC) &_MNMix_fastQF, 2},
+    {"_MNMix_cov", (DL_FUNC) &_MNMix_cov, 3},
+    {"_MNMix_det", (DL_FUNC) &_MNMix_det, 1},
+    {"_MNMix_matIP", (DL_FUNC) &_MNMix_matIP, 2},
+    {"_MNMix_matInv", (DL_FUNC) &_MNMix_matInv, 1},
+    {"_MNMix_MMP", (DL_FUNC) &_MNMix_MMP, 2},
+    {"_MNMix_matOP", (DL_FUNC) &_MNMix_matOP, 2},
     {"_MNMix_SchurC", (DL_FUNC) &_MNMix_SchurC, 3},
+    {"_MNMix_tr", (DL_FUNC) &_MNMix_tr, 1},
     {NULL, NULL, 0}
 };
 

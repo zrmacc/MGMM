@@ -1,5 +1,5 @@
 # Purpose: Data generation for mixture of normals
-# Updated: 180821
+# Updated: 19/01/15
 
 #' Data Generation from Multivariate Normal Mixture Models
 #' 
@@ -24,13 +24,19 @@
 #'   to the zero vector.
 #' @param S Either a prototype covariance matrix, or a list of covariance 
 #'   matrices. Defaults to the identity matrix.
-#' @return Numeric matrix with observations as rows. 
+#' @return Numeric matrix with observations as rows. Row numbers specify the
+#'   true cluster assignments.
+#' 
 #' @importFrom foreach foreach '%do%'
 #' @importFrom mvnfast rmvn
 #' @importFrom stats rmultinom
+#' 
 #' @export
+#' @seealso For estimation, see \code{\link{fit.MNMix}}.
 #' 
 #' @examples 
+#' \dontrun{
+#' set.seed(100);
 #' # Single component without missingness
 #' # Bivariate normal observations
 #' Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
@@ -53,6 +59,7 @@
 #' M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 #' S = 0.5*diag(2);
 #' Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
+#' }
 
 rMNMix = function(n,d=2,k=1,pi,m=0,M,S){
   ## Input checks
@@ -86,19 +93,20 @@ rMNMix = function(n,d=2,k=1,pi,m=0,M,S){
     Mi = M[[1]];
     Si = S[[1]];
     Y = rmvn(n=n,mu=Mi,sigma=Si);
+    row.names(Y) = rep(1,n);
   } else {
     # Case 2: Multiple mixture components
-    z = rmultinom(n=n,size=1,prob=pi);
-    aux = function(x){which(x==1)};
-    z = apply(z,2,aux);
-    i = NULL;
+    z = sample(x=seq(1:k),size=n,replace=T,prob=pi);
+    i = 1;
     Y = foreach(i=1:k,.combine=rbind) %do% {
       ni = sum(z==i);
       # Output only if component is non-empty
       if(ni>0){
         Mi = M[[i]];
         Si = S[[i]];
-        return(rmvn(n=ni,mu=Mi,sigma=Si));
+        Out = rmvn(n=ni,mu=Mi,sigma=Si);
+        row.names(Out) = rep(i,ni);
+        return(Out);
       }
     }
     # Permute row order
@@ -116,6 +124,5 @@ rMNMix = function(n,d=2,k=1,pi,m=0,M,S){
   
   ## Format
   colnames(Y) = paste0("y",seq(1:d));
-  rownames(Y) = seq(1:n);
   return(Y);
 }

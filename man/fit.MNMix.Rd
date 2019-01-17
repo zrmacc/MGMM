@@ -4,8 +4,8 @@
 \alias{fit.MNMix}
 \title{Estimate Multivariate Normal Mixture}
 \usage{
-fit.MNMix(Y, k = 1, M0, S0, pi0, maxit = 100, eps = 1e-06, report = T,
-  parallel = F)
+fit.MNMix(Y, k = 1, M0, S0, pi0, maxit = 100, eps = 1e-06,
+  report = T, parallel = F)
 }
 \arguments{
 \item{Y}{Numeric data matrix.}
@@ -36,11 +36,8 @@ For a single component model \eqn{k=1}, a list is returned,
 }
 \description{
 Given an \eqn{n \times d} matrix of random vectors, estimates the parameters
-of a multivariate normal mixture model. Accommodates arbitrary patterns of
-missingness, provided the elements are missing at random (MAR). Here, MAR
-entails that whether or not an element is observed is conditionally
-independent of that element's value, given the observed elements. The number
-of mixture components is specified using \code{k}.
+of a Gaussian Mixture Model (GMM). Accommodates arbitrary patterns of missingness
+at random (MAR) in the input vectors.
 }
 \details{
 Initial values for the cluster means, covariances, and proportions are
@@ -51,6 +48,7 @@ internally using K-means. If the data contains no complete observations, then
 initial values are required for \code{M0}, \code{S0}, and \code{pi0}.
 }
 \examples{
+\dontrun{
 # Single component without missingness
 # Bivariate normal observations
 Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
@@ -73,8 +71,13 @@ M = fit.MNMix(Y=Y,k=2);
 
 # Four components with missingness
 # Bivariate normal observations
+# Note: Fitting is slow. 
 M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 S = 0.5*diag(2);
 Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
 M = fit.MNMix(Y=Y,k=4);
+}
+}
+\seealso{
+For data generation, see \code{\link{rMNMix}}.
 }

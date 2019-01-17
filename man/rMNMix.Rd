@@ -25,7 +25,8 @@ to the zero vector.}
 matrices. Defaults to the identity matrix.}
 }
 \value{
-Numeric matrix with observations as rows.
+Numeric matrix with observations as rows. Row numbers specify the
+  true cluster assignments.
 }
 \description{
 Generates an \eqn{n\times d} matrix of multivariate normal random vectors
@@ -40,6 +41,8 @@ using \code{M}, and the cluster covariance matrices are provided using
 setting that proportion of elements in the data matrix to \code{NA}.
 }
 \examples{
+\dontrun{
+set.seed(100);
 # Single component without missingness
 # Bivariate normal observations
 Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
@@ -62,4 +65,8 @@ Y = rMNMix(n=1e3,d=3,k=2,M=Means,S=Sigma);
 M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 S = 0.5*diag(2);
 Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
+}
+}
+\seealso{
+For estimation, see \code{\link{fit.MNMix}}.
 }
