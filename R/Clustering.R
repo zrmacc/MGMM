@@ -227,6 +227,7 @@ clustQual = function(M){
 
 chooseK = function(Y,k0=2,k1=NULL,B=100,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=10,eps=1e-4,report=T,parallel=F){
   # Check inputs
+  if(k0<2){stop("At least 2 clusters are required to calculate quality metrics.")};
   if(is.null(k1)){k1=k0+2};
   n = nrow(Y);
   
@@ -243,7 +244,7 @@ chooseK = function(Y,k0=2,k1=NULL,B=100,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,max
     # Current cluster number
     k = K[j];
     # Loop over bootstrap replicates
-    Boot = foreach(b=1:B,.combine=rbind) %dopar% {
+    Boot = foreach(b=1:B,.combine=rbind,.errorhandling="remove") %dopar% {
       if(b==1){
         ## Original sample
         M = tryCatch(expr=fit.GMM(Y=Y,k=k,M0=M0,fix.means=fix.means,S0=S0,pi0=pi0,maxit=maxit,eps=eps,report=F,parallel=F),
@@ -270,26 +271,32 @@ chooseK = function(Y,k0=2,k1=NULL,B=100,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,max
       return(Out);
     }; # End bootstrap loop
     
-    # Remove NA
-    Boot = Boot[complete.cases(Boot),];
-    
-    # Summary statistics
-    nb = nrow(Boot);
-    if(!is.null(nb)){
-      Means = aaply(.data=Boot,.margins=2,.fun=mean);  
-      Vs = aaply(.data=Boot,.margins=2,.fun=var);
-      SEs = sqrt(Vs/nb);
+    # Check if any fits were successful
+    if(is.null(Boot)){
+      cat("No fits succeeded at size",k,"\n");
     } else {
-      Means = Boot;
-      SEs = rep(NA,4);
-    }
-    
-    # Report
-    if(report){cat("Cluster size",k,"complete.\n")};
-    # Output
-    Out = data.frame("Clusters"=k,"Metric"=names(Means),"Mean"=Means,"SE"=SEs);
-    rownames(Out) = NULL;
-    return(Out);
+      # Remove NA
+      Boot = Boot[complete.cases(Boot),,drop=F];
+      nb = nrow(Boot);
+      # Report
+      if(report){cat("Cluster size",k,"complete.",nb,"fit(s) succeeded.\n")};
+      # Output if at least 3 fits were successful
+      if(!is.null(nb)&(nb>=3)){
+        # Summary statistics
+        Means = aaply(.data=Boot,.margins=2,.fun=mean);  
+        Vs = aaply(.data=Boot,.margins=2,.fun=var);
+        SEs = sqrt(Vs/nb);
+        # Output
+        Out = data.frame("Clusters"=k,"Fits"=nb,"Metric"=names(Means),"Mean"=Means,"SE"=SEs);
+        rownames(Out) = NULL;
+        return(Out);
+      };
+    };
+  };
+  
+  # Check for any results
+  if(is.null(Results)){
+    stop("Unable to fit sufficient models with the current cluster numbers.");
   };
   
   ## Cluster recommendations
