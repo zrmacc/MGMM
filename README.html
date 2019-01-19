@@ -138,6 +138,7 @@ $(document).ready(function () {
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#data-generation">Data Generation</a></li>
 <li><a href="#parameter-estimation">Parameter Estimation</a></li>
+<li><a href="#cluster-number-selection">Selecting the Number of Clusters</a></li>
 </ul>
 </div>
 <div id="introduction" class="section level1">
@@ -148,7 +149,7 @@ $(document).ready(function () {
 </div>
 <div id="model" class="section level2">
 <h2>Model</h2>
-<p>Suppose the data consist of <span class="math inline">\(n\)</span> random vectors <span class="math inline">\(\{y_{i}\}_{i=1}^{n}\)</span> in <span class="math inline">\(\mathbb{R}^{d}\)</span>. Each observation <span class="math inline">\(y_{i}\)</span> arises from one of <span class="math inline">\(k\)</span> distinct clusters. Associate with each observation a <span class="math inline">\(k\times 1\)</span> vector of indicators <span class="math inline">\(z_{i}\)</span>, where <span class="math inline">\(z_{ij} = 1\)</span> if observation <span class="math inline">\(i\)</span> belongs to cluster <span class="math inline">\(j\)</span>. The marginal probability of membership the <span class="math inline">\(j\)</span>th cluster is <span class="math inline">\(\pi_{j} = P[z_{ij}=1]\)</span>. Conditional on membership to the <span class="math inline">\(j\)</span>th cluster, <span class="math inline">\(y_{i}\)</span> follows a multivariate normal distribution, with mean <span class="math inline">\(\mu_{j}\)</span> and covariance <span class="math inline">\(\Sigma_{j}\)</span>. The generative model is:</p>
+<p>Suppose the data consist of <span class="math inline">\(n\)</span> random vectors in <span class="math inline">\(\mathbb{R}^{d}\)</span>. Each observation <span class="math inline">\(y_{i}\)</span> arises from one of <span class="math inline">\(k\)</span> distinct clusters. Associate with each observation a <span class="math inline">\(k\times 1\)</span> vector of indicators <span class="math inline">\(z_{i}\)</span>, where <span class="math inline">\(z_{ij} = 1\)</span> if observation <span class="math inline">\(i\)</span> belongs to cluster <span class="math inline">\(j\)</span>. The marginal probability of membership the <span class="math inline">\(j\)</span>th cluster is <span class="math inline">\(\pi_{j} = P[z_{ij}=1]\)</span>. Conditional on membership to the <span class="math inline">\(j\)</span>th cluster, <span class="math inline">\(y_{i}\)</span> follows a multivariate normal distribution, with mean <span class="math inline">\(\mu_{j}\)</span> and covariance <span class="math inline">\(\Sigma_{j}\)</span>. The generative model is:</p>
 <p><span class="math display">\[
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
 \]</span></p>
@@ -357,8 +358,7 @@ head(M@Assignments);</code></pre>
 ## 0.491 0.509 
 ## 
 ## Final Objective:
-##       k1 
-## -2828.15 
+## [1] -2828.15
 ## 
 ## Cluster means:
 ## [[1]]
@@ -392,13 +392,13 @@ head(M@Assignments);</code></pre>
 ## 6 9.999979e-01 2.134687e-06
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          1
-## 2          2
-## 3          1
-## 4          2
-## 5          2
-## 6          1</code></pre>
+##   Assignment      Entropy
+## 1          1 1.183186e-04
+## 2          2 1.512606e-04
+## 3          1 6.689411e-01
+## 4          2 2.291396e-06
+## 5          2 4.083414e-05
+## 6          1 4.329197e-05</code></pre>
 </div>
 <div id="four-components-with-missingness-1" class="section level3">
 <h3>Four Components with Missingness</h3>
@@ -432,8 +432,7 @@ head(M@Assignments);</code></pre>
 ## 0.170 0.303 0.171 0.356 
 ## 
 ## Final Objective:
-##       k1 
-## -3115.16 
+## [1] -3115.16
 ## 
 ## Cluster means:
 ## [[1]]
@@ -454,14 +453,78 @@ head(M@Assignments);</code></pre>
 ## 
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          2
-## 2          3
-## 3          4
-## 4          4
-## 5          2
-## 6          2</code></pre>
+##   Assignment    Entropy
+## 1          2 0.32886727
+## 2          3 0.40368159
+## 3          4 0.04354316
+## 4          4 0.06061585
+## 5          2 0.51428871
+## 6          2 0.43669421</code></pre>
 </div>
+</div>
+</div>
+<div id="cluster-number-selection" class="section level1">
+<h1>Cluster Number Selection</h1>
+<div id="clustering-quality" class="section level2">
+<h2>Clustering Quality</h2>
+<p>The function <code>clustQual</code> provides several metrics for internally assessing the quality of cluster assignments from a fitted GMM. The input is an object of class <code>mix</code>. The output is a list containing the metrics: BIC, CHI, DBI, and SIL. BIC is the Bayesian Information Criterion, which is a penalized version of the negative log likelihood. A lower value indicates better clustering quality. CHI is the Calinski-Harabaz Index, a ratio of the between cluster to within cluster variation. A higher value indicates better clustering quality. DBI is the Davies-Bouldin Index, an average of cluster similarities. A lower value indicates better clustering quality. SIL is the average Silhouette width, a measure of how well an observation matches its assigned cluster. A higher value indicates better clustering quality.</p>
+<pre class="r"><code>set.seed(105);
+# Four components without missingness
+M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
+Y = rGMM(n=100,d=2,k=4,M=M);
+M = fit.GMM(Y=Y,k=4,maxit=100,eps=1e-8,report=F);
+# Quality metrics
+Q = clustQual(M);
+cat(&quot;BIC:\n&quot;);
+Q$BIC;
+cat(&quot;\nCHI:\n&quot;);
+Q$CHI;
+cat(&quot;\nDBI:\n&quot;);
+Q$DBI;
+cat(&quot;\nSIL:\n&quot;);
+Q$SIL;</code></pre>
+<pre><code>## BIC:
+## [1] 615.1913
+## 
+## CHI:
+## [1] 1.616594
+## 
+## DBI:
+## [1] 2.071082
+## 
+## SIL:
+## [1] 0.5060318</code></pre>
+</div>
+<div id="choosing-the-number-of-clusters" class="section level2">
+<h2>Choosing the Number of Clusters</h2>
+<p>In applications, the number of clusters <span class="math inline">\(k\)</span> is often unknown. The function <code>chooseK</code> is designed to provide guidance on the number of clusters. The inputs include the data matrix <code>Y</code>, the minimum cluster number to assess <code>k0</code>, the maximum cluster number to assess <code>k1</code>, and the number of bootstrap replicates at each cluster number <code>B</code>. For each cluster number <span class="math inline">\(k\)</span> between <span class="math inline">\(k_{0}\)</span> and <span class="math inline">\(k_{1}\)</span>, <span class="math inline">\(B\)</span> bootstrap data sets are generated. A GMM with <span class="math inline">\(k\)</span> components is fit, and the quality metrics are calculated. The bootstrap replicates are summarized by their mean and standard error (SE). For each quality metric, the cluster number <span class="math inline">\(k_{\text{opt}}\)</span> that had the optimal quality, and the smallest cluster number whose quality was within 1 SE of the optimum <span class="math inline">\(k_{\text{1se}}\)</span>, are reported. The output is a list containing <code>Choices</code>, the cluster number choices, and <code>Results</code>, all results from the cluster number search.</p>
+<pre class="r"><code># Cluster number selection
+K = chooseK(Y=Y,k0=2,k1=6,B=10);
+cat(&quot;\nCluster number choices:\n&quot;);
+K$Choices;
+cat(&quot;\nAll results:\n&quot;);
+head(K$Results);</code></pre>
+<pre><code>## Cluster size 2 complete.
+## Cluster size 3 complete.
+## Cluster size 4 complete.
+## Cluster size 5 complete.
+## Cluster size 6 complete.
+## 
+## Cluster number choices:
+##   Metric kopt Metric_kopt k1se Metric_k1se
+## 1    BIC    4 614.6246030    4 614.6246030
+## 2    CHI    4   1.4358656    4   1.4358656
+## 3    DBI    2   2.0758853    2   2.0758853
+## 4    SIL    5   0.4369034    2   0.4320283
+## 
+## All results:
+##   Clusters Metric        Mean           SE
+## 1        2    BIC 654.8777210  4.815659269
+## 2        2    CHI   0.5437773  0.111736638
+## 3        2    DBI   2.0758853  0.214228576
+## 4        2    SIL   0.4320283  0.005596724
+## 5        3    BIC 655.1132886 10.988737315
+## 6        3    CHI   1.0258463  0.133998188</code></pre>
 </div>
 </div>
 

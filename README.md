@@ -17,6 +17,7 @@ output:
 * [Introduction](#introduction)
 * [Data Generation](#data-generation)
 * [Parameter Estimation](#parameter-estimation)
+* [Selecting the Number of Clusters](#cluster-number-selection)
 
 # Introduction
 
@@ -26,7 +27,7 @@ This package implements clustering of multivariate normal random vectors with mi
 
 ## Model
 
-Suppose the data consist of $n$ random vectors $\{y_{i}\}_{i=1}^{n}$ in $\mathbb{R}^{d}$. Each observation $y_{i}$ arises from one of $k$ distinct clusters. Associate with each observation a $k\times 1$ vector of indicators $z_{i}$, where $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{ij}=1]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
+Suppose the data consist of $n$ random vectors in $\mathbb{R}^{d}$. Each observation $y_{i}$ arises from one of $k$ distinct clusters. Associate with each observation a $k\times 1$ vector of indicators $z_{i}$, where $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{ij}=1]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
 
 $$
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
@@ -291,8 +292,7 @@ head(M@Assignments);
 ## 0.491 0.509 
 ## 
 ## Final Objective:
-##       k1 
-## -2828.15 
+## [1] -2828.15
 ## 
 ## Cluster means:
 ## [[1]]
@@ -326,13 +326,13 @@ head(M@Assignments);
 ## 6 9.999979e-01 2.134687e-06
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          1
-## 2          2
-## 3          1
-## 4          2
-## 5          2
-## 6          1
+##   Assignment      Entropy
+## 1          1 1.183186e-04
+## 2          2 1.512606e-04
+## 3          1 6.689411e-01
+## 4          2 2.291396e-06
+## 5          2 4.083414e-05
+## 6          1 4.329197e-05
 ```
 
 ### Four Components with Missingness
@@ -373,8 +373,7 @@ head(M@Assignments);
 ## 0.170 0.303 0.171 0.356 
 ## 
 ## Final Objective:
-##       k1 
-## -3115.16 
+## [1] -3115.16
 ## 
 ## Cluster means:
 ## [[1]]
@@ -395,12 +394,88 @@ head(M@Assignments);
 ## 
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          2
-## 2          3
-## 3          4
-## 4          4
-## 5          2
-## 6          2
+##   Assignment    Entropy
+## 1          2 0.32886727
+## 2          3 0.40368159
+## 3          4 0.04354316
+## 4          4 0.06061585
+## 5          2 0.51428871
+## 6          2 0.43669421
 ```
 
+# Cluster Number Selection
+
+## Clustering Quality
+
+The function `clustQual` provides several metrics for internally assessing the quality of cluster assignments from a fitted GMM. The input is an object of class `mix`. The output is a list containing the metrics: BIC, CHI, DBI, and SIL. BIC is the Bayesian Information Criterion, which is a penalized version of the negative log likelihood. A lower value indicates better clustering quality. CHI is the Calinski-Harabaz Index, a ratio of the between cluster to within cluster variation. A higher value indicates better clustering quality. DBI is the Davies-Bouldin Index, an average of cluster similarities. A lower value indicates better clustering quality. SIL is the average Silhouette width, a measure of how well an observation matches its assigned cluster. A higher value indicates better clustering quality. 
+
+
+```r
+set.seed(105);
+# Four components without missingness
+M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
+Y = rGMM(n=100,d=2,k=4,M=M);
+M = fit.GMM(Y=Y,k=4,maxit=100,eps=1e-8,report=F);
+# Quality metrics
+Q = clustQual(M);
+cat("BIC:\n");
+Q$BIC;
+cat("\nCHI:\n");
+Q$CHI;
+cat("\nDBI:\n");
+Q$DBI;
+cat("\nSIL:\n");
+Q$SIL;
+```
+
+```
+## BIC:
+## [1] 615.1913
+## 
+## CHI:
+## [1] 1.616594
+## 
+## DBI:
+## [1] 2.071082
+## 
+## SIL:
+## [1] 0.5060318
+```
+
+## Choosing the Number of Clusters
+
+In applications, the number of clusters $k$ is often unknown. The function `chooseK` is designed to provide guidance on the number of clusters. The inputs include the data matrix `Y`, the minimum cluster number to assess `k0`, the maximum cluster number to assess `k1`, and the number of bootstrap replicates at each cluster number `B`. For each cluster number $k$ between $k_{0}$ and $k_{1}$, $B$ bootstrap data sets are generated. A GMM with $k$ components is fit, and the quality metrics are calculated. The bootstrap replicates are summarized by their mean and standard error (SE). For each quality metric, the cluster number $k_{\text{opt}}$ that had the optimal quality, and the smallest cluster number whose quality was within 1 SE of the optimum $k_{\text{1se}}$, are reported. The output is a list containing `Choices`, the cluster number choices, and `Results`, all results from the cluster number search. 
+
+
+```r
+# Cluster number selection
+K = chooseK(Y=Y,k0=2,k1=6,B=10);
+cat("\nCluster number choices:\n");
+K$Choices;
+cat("\nAll results:\n");
+head(K$Results);
+```
+
+```
+## Cluster size 2 complete.
+## Cluster size 3 complete.
+## Cluster size 4 complete.
+## Cluster size 5 complete.
+## Cluster size 6 complete.
+## 
+## Cluster number choices:
+##   Metric kopt Metric_kopt k1se Metric_k1se
+## 1    BIC    4 614.6246030    4 614.6246030
+## 2    CHI    4   1.4358656    4   1.4358656
+## 3    DBI    2   2.0758853    2   2.0758853
+## 4    SIL    5   0.4369034    2   0.4320283
+## 
+## All results:
+##   Clusters Metric        Mean           SE
+## 1        2    BIC 654.8777210  4.815659269
+## 2        2    CHI   0.5437773  0.111736638
+## 3        2    DBI   2.0758853  0.214228576
+## 4        2    SIL   0.4320283  0.005596724
+## 5        3    BIC 655.1132886 10.988737315
+## 6        3    CHI   1.0258463  0.133998188
+```

@@ -23,6 +23,8 @@
 #' @param report Report fitting progress?
 #' @param parallel Run in parallel? Must register parallel backend first. 
 #' @return Object of class \code{mix} containing the estimated 
+#' 
+#' @importFrom foreach foreach registerDoSEQ '%do%' '%dopar%'
 #' @importFrom methods new
 #' @importFrom mvnfast dmvn
 #' @importFrom plyr aaply
@@ -105,6 +107,16 @@ fit.mix = function(Y,k=2,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=100,eps=1e-6
   if(!is.null(M0)){theta0$M=M0};
   if(!is.null(S0)){theta0$S=S0};
   if(!is.null(pi0)){theta0$pi=pi0};
+  
+  # Check that estimated covariances are positive definite
+  aux = function(x){
+    E = eigen(x=x,symmetric=T,only.values=T);
+    return(E$values);
+  }
+  evalues = unlist(lapply(X=theta0$S,FUN=aux));
+  if(min(evalues)<=0){
+    stop("Initial covariance matrices are not all positive definite.");
+  };
   
   # Initial responsibilities
   theta0$G = Responsibility(M=theta0$M,S=theta0$S,pi=theta0$pi,Y0=Y0,Y1=Y1,parallel);
@@ -289,7 +301,13 @@ fit.mix = function(Y,k=2,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=100,eps=1e-6
   G = rbind(G,cbind("ID"=c(ID2),array(NA,dim=c(length(ID2),k))));
   G = G[order(G[,1]),];
   rownames(G) = seq(1:nrow(G));
-  G = data.frame(G[,-1,drop=F]);
+  G = G[,-1,drop=F];
+  
+  # Add entropies
+  E = aaply(.data=G[],.margins=1,.fun=function(x){-sum(x*log(x))/log(k)});
+  E[is.na(E)] = 0;
+  A$Entropy = E;
+  G = data.frame(G);
   
   # Density evaluations
   D = cbind("ID"=c(ID0,ID1),D);
@@ -323,9 +341,13 @@ fit.mix = function(Y,k=2,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=100,eps=1e-6
   # Sort
   Y_Complete = Y_Complete[order(Y_Complete[,1]),-1];
   rownames(Y_Complete) = rownames(Y);
+  
+  # Objective
+  Obj = theta0$Q1;
+  names(Obj) = NULL;
 
   ## Output
-  Out = new(Class="mix",Components=k,Means=theta0$M,Covariances=theta0$S,Proportions=theta0$pi,Objective=theta0$Q1,
+  Out = new(Class="mix",Components=k,Means=theta0$M,Covariances=theta0$S,Proportions=theta0$pi,Objective=Obj,
             Density=D,Responsibilities=G,Assignments=A,Completed=Y_Complete);
   return(Out);
 }

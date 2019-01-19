@@ -33,7 +33,8 @@
 #'   responsibilities, and observation assignments.
 #' 
 #' @export
-#' @seealso For data generation, see \code{\link{rGMM}}.
+#' @seealso See \code{\link{rGMM}} for data generation, and \code{\link{chooseK}} for selecting
+#' the number of clusters. 
 #' 
 #' @examples 
 #' \dontrun{
@@ -66,13 +67,13 @@
 #' M = fit.GMM(Y=Y,k=4);
 #' }
 
-fit.GMM = function(Y,k=1,M0,fix.means=F,S0,pi0,maxit=100,eps=1e-6,report=T,parallel=F){
+fit.GMM = function(Y,k=1,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=T,parallel=F){
   ## Check data
   if(!is.matrix(Y)){stop("A numeric matrix with observations as rows is expected for Y.")};
   d = ncol(Y);
   ## Check initial values
   # Mean vectors
-  if(!missing(M0)){
+  if(!is.null(M0)){
     # Object type
     if(!is.list(M0)){stop("If M0 is provided, a list of initial vectors, one for each component, is required.")};
     # Initial mean for each component
@@ -86,7 +87,7 @@ fit.GMM = function(Y,k=1,M0,fix.means=F,S0,pi0,maxit=100,eps=1e-6,report=T,paral
   };
   if(fix.means&is.null(M0)){stop("If means are fixed, then initial values are required.")};
   # Covariance matrices
-  if(!missing(S0)){
+  if(!is.null(S0)){
     # Object type 
     if(!is.list(S0)){stop("If S0 is provided, a list of initial matrices, one for each component, is required.")};
     # Initial covariance for each component
@@ -99,7 +100,7 @@ fit.GMM = function(Y,k=1,M0,fix.means=F,S0,pi0,maxit=100,eps=1e-6,report=T,paral
     S0 = NULL;
   };
   # Cluster proportions
-  if(!missing(pi0)){
+  if(!is.null(pi0)){
     # Object type
     if(!is.numeric(pi0)){stop("If pi0 is provided, a numeric vector of proportions is required.")};
     # Initial proportion for each component

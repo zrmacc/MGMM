@@ -8,7 +8,6 @@
 #' @param A First matrix.
 #' @param B Second matrix.
 #' @param cor Return correlation matrix?
-#' @export
 #' @return Numeric matrix. 
 cov <- function(A, B, cor = FALSE) {
     .Call('_MGMM_cov', PACKAGE = 'MGMM', A, B, cor)
@@ -20,7 +19,6 @@ cov <- function(A, B, cor = FALSE) {
 #'
 #' @param A Numeric matrix.
 #' @return Scalar. 
-#' @export 
 det <- function(A) {
     .Call('_MGMM_det', PACKAGE = 'MGMM', A)
 }
@@ -32,7 +30,6 @@ det <- function(A) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix. 
-#' @export 
 matIP <- function(A, B) {
     .Call('_MGMM_matIP', PACKAGE = 'MGMM', A, B)
 }
@@ -43,7 +40,6 @@ matIP <- function(A, B) {
 #'
 #' @param A Numeric matrix.
 #' @return Numeric matrix. 
-#' @export 
 matInv <- function(A) {
     .Call('_MGMM_matInv', PACKAGE = 'MGMM', A)
 }
@@ -55,7 +51,6 @@ matInv <- function(A) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix. 
-#' @export 
 MMP <- function(A, B) {
     .Call('_MGMM_MMP', PACKAGE = 'MGMM', A, B)
 }
@@ -67,7 +62,6 @@ MMP <- function(A, B) {
 #' @param X Numeric matrix.
 #' @param Y Numeric matrix.
 #' @return Numeric matrix.
-#' @export 
 matOP <- function(X, Y) {
     .Call('_MGMM_matOP', PACKAGE = 'MGMM', X, Y)
 }
@@ -80,7 +74,6 @@ matOP <- function(X, Y) {
 #' @param Iaa Information of nuisance parameter
 #' @param Iba Cross information between target and nuisance parameters
 #' @return Numeric matrix. 
-#' @export 
 SchurC <- function(Ibb, Iaa, Iba) {
     .Call('_MGMM_SchurC', PACKAGE = 'MGMM', Ibb, Iaa, Iba)
 }
@@ -91,7 +84,6 @@ SchurC <- function(Ibb, Iaa, Iba) {
 #'
 #' @param A Numeric matrix.
 #' @return Scalar.
-#' @export  
 tr <- function(A) {
     .Call('_MGMM_tr', PACKAGE = 'MGMM', A)
 }

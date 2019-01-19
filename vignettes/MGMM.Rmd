@@ -19,6 +19,7 @@ library(MGMM);
 * [Introduction](#introduction)
 * [Data Generation](#data-generation)
 * [Parameter Estimation](#parameter-estimation)
+* [Selecting the Number of Clusters](#cluster-number-selection)
 
 # Introduction
 
@@ -28,7 +29,7 @@ This package implements clustering of multivariate normal random vectors with mi
 
 ## Model
 
-Suppose the data consist of $n$ random vectors $\{y_{i}\}_{i=1}^{n}$ in $\mathbb{R}^{d}$. Each observation $y_{i}$ arises from one of $k$ distinct clusters. Associate with each observation a $k\times 1$ vector of indicators $z_{i}$, where $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{ij}=1]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
+Suppose the data consist of $n$ random vectors in $\mathbb{R}^{d}$. Each observation $y_{i}$ arises from one of $k$ distinct clusters. Associate with each observation a $k\times 1$ vector of indicators $z_{i}$, where $z_{ij} = 1$ if observation $i$ belongs to cluster $j$. The marginal probability of membership the $j$th cluster is $\pi_{j} = P[z_{ij}=1]$. Conditional on membership to the $j$th cluster, $y_{i}$ follows a multivariate normal distribution, with mean $\mu_{j}$ and covariance $\Sigma_{j}$. The generative model is:
 
 $$
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
@@ -221,3 +222,40 @@ cat("\nCluster assignments:\n");
 head(M@Assignments);
 ```
 
+# Cluster Number Selection
+
+## Clustering Quality
+
+The function `clustQual` provides several metrics for internally assessing the quality of cluster assignments from a fitted GMM. The input is an object of class `mix`. The output is a list containing the metrics: BIC, CHI, DBI, and SIL. BIC is the Bayesian Information Criterion, which is a penalized version of the negative log likelihood. A lower value indicates better clustering quality. CHI is the Calinski-Harabaz Index, a ratio of the between cluster to within cluster variation. A higher value indicates better clustering quality. DBI is the Davies-Bouldin Index, an average of cluster similarities. A lower value indicates better clustering quality. SIL is the average Silhouette width, a measure of how well an observation matches its assigned cluster. A higher value indicates better clustering quality. 
+
+```{r}
+set.seed(105);
+# Four components without missingness
+M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
+Y = rGMM(n=100,d=2,k=4,M=M);
+M = fit.GMM(Y=Y,k=4,maxit=100,eps=1e-8,report=F);
+# Quality metrics
+Q = clustQual(M);
+cat("BIC:\n");
+Q$BIC;
+cat("\nCHI:\n");
+Q$CHI;
+cat("\nDBI:\n");
+Q$DBI;
+cat("\nSIL:\n");
+Q$SIL;
+```
+
+## Choosing the Number of Clusters
+
+In applications, the number of clusters $k$ is often unknown. The function `chooseK` is designed to provide guidance on the number of clusters. The inputs include the data matrix `Y`, the minimum cluster number to assess `k0`, the maximum cluster number to assess `k1`, and the number of bootstrap replicates at each cluster number `B`. For each cluster number $k$ between $k_{0}$ and $k_{1}$, $B$ bootstrap data sets are generated. A GMM with $k$ components is fit, and the quality metrics are calculated. The bootstrap replicates are summarized by their mean and standard error (SE). For each quality metric, the cluster number $k_{\text{opt}}$ that had the optimal quality, and the smallest cluster number whose quality was within 1 SE of the optimum $k_{\text{1se}}$, are reported. The output is a list containing `Choices`, the cluster number choices, and `Results`, all results from the cluster number search. 
+
+```{r}
+# Cluster number selection
+K = chooseK(Y=Y,k0=2,k1=6,B=10);
+cat("\nCluster number choices:\n");
+K$Choices;
+cat("\nAll results:\n");
+head(K$Results);
+
+```

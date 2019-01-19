@@ -11,6 +11,7 @@ LinkingTo:
 	Rcpp,
 	RcppEigen
 Imports:
+	cluster,
 	foreach,
 	methods, 
 	mvnfast,

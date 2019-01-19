@@ -4,8 +4,8 @@
 \alias{fit.GMM}
 \title{Estimate Multivariate Normal Mixture}
 \usage{
-fit.GMM(Y, k = 1, M0, fix.means = F, S0, pi0, maxit = 100,
-  eps = 1e-06, report = T, parallel = F)
+fit.GMM(Y, k = 1, M0 = NULL, fix.means = F, S0 = NULL,
+  pi0 = NULL, maxit = 100, eps = 1e-06, report = T, parallel = F)
 }
 \arguments{
 \item{Y}{Numeric data matrix.}
@@ -82,5 +82,6 @@ M = fit.GMM(Y=Y,k=4);
 }
 }
 \seealso{
-For data generation, see \code{\link{rGMM}}.
+See \code{\link{rGMM}} for data generation, and \code{\link{chooseK}} for selecting
+the number of clusters.
 }

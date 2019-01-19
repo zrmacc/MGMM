@@ -8,11 +8,11 @@ NULL
 #' MGMM: Missingness Aware Gaussian Mixture Models
 #' 
 #' Parameter estimation and classification via Gaussian Mixture Models, allowing
-#' for missingness in the input vectors. For estimation of the GMM, see
-#' \code{\link{fit.GMM}}. For data generation from a GMM, see
-#' \code{\link{rGMM}}.
+#' for missingness in the input vectors. See \code{\link{fit.GMM}} for estimating
+#' the GMM, and \code{\link{chooseK}} for selecting the number of cluseters. See 
+#' \code{\link{rGMM}} for simulating data from a GMM.
 #' 
 #' @author Zachary R. McCaw
 #' @docType package
-#' @name MNMix
+#' @name MGMM
 NULL

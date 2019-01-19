@@ -8,7 +8,6 @@
 //' @param A First matrix.
 //' @param B Second matrix.
 //' @param cor Return correlation matrix?
-//' @export
 //' @return Numeric matrix. 
 // [[Rcpp::export]]
 
