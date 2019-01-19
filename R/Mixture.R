@@ -1,5 +1,5 @@
 # Purpose: Fits a multivariate normal mixture in the presence of missingness
-# Updated: 19/01/17
+# Updated: 19/01/18
 
 ########################
 # Main Function
@@ -14,6 +14,8 @@
 #' @param Y Numeric data matrix.
 #' @param k Number of mixture components. Defaults to 2.
 #' @param M0 Optional list of initial mean vectors.
+#' @param fix.means Fix the means to their starting value? Must provide initial
+#'   values.
 #' @param S0 Optional list of initial covariance matrices.
 #' @param pi0 Optional vector of initial cluster proportions. 
 #' @param maxit Maximum number of EM iterations.
@@ -26,7 +28,7 @@
 #' @importFrom plyr aaply
 #' @importFrom stats kmeans
 
-fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,parallel=F){
+fit.mix = function(Y,k=2,M0=NULL,fix.means=F,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,parallel=F){
   # Dimensions
   d = ncol(Y);
   lab = colnames(Y);
@@ -48,20 +50,21 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
     # Exclude completely missing observations
     aux1 = function(x){sum(is.na(x))!=d};
     keep = apply(Y1,1,aux1);
+    ID2 = ID1[!keep];
     rm(aux1);
     Y1 = Y1[keep,];
     ID1 = ID1[keep];
     n1 = nrow(Y1);
     
     # Completely missing observations
-    ID2 = ID1[!keep];
+    n2 = length(ID2);
     
     # Final sample size
     n = n0+n1;
   } else {
     # If no missingness: 
     Y1 = ID1 = ID2 = NULL;
-    n1 = 0;
+    n1 = n2 = 0;
     n = n0;
   }
   
@@ -69,7 +72,7 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
   theta0 = theta1 = list();
   if(n0>0){
     # If complete cases are available, apply kmeans:
-    K = kmeans(x=Y0,centers=k,iter.max=10,nstart=10);
+    K = kmeans(x=Y0,centers=k,iter.max=100,nstart=100);
     
     # Assignments
     Z0 = K$cluster;
@@ -89,9 +92,6 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
     # Initial cluster proportions
     theta0$pi = as.numeric(table(Z0))/n0;
     
-    # Initial responsibilities
-    theta0$G = Responsibility(M=theta0$M,S=theta0$S,pi=theta0$pi,Y0=Y0,Y1=Y1,parallel);
-    
     # Clean workspace
     rm(K,Z0,M);
   } else {
@@ -105,6 +105,9 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
   if(!is.null(M0)){theta0$M=M0};
   if(!is.null(S0)){theta0$S=S0};
   if(!is.null(pi0)){theta0$pi=pi0};
+  
+  # Initial responsibilities
+  theta0$G = Responsibility(M=theta0$M,S=theta0$S,pi=theta0$pi,Y0=Y0,Y1=Y1,parallel);
   
   ## Update Function
   Update = function(theta){
@@ -157,22 +160,26 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
     Q0 = P0-D0-T0;
     
     ## Update Means
-    # Loop over clusters
-    M1 = foreach(j=1:k) %dopar% {
-      # Total
-      Total = 0;
-      # Complete cases
-      if(n0>0){
-        Total = Total + apply(G0[,j]*Y0,2,sum);
+    if(fix.means){
+      M1 = M0;
+    } else {
+      # Loop over clusters
+      M1 = foreach(j=1:k) %dopar% {
+        # Total
+        Total = 0;
+        # Complete cases
+        if(n0>0){
+          Total = Total + apply(G0[,j]*Y0,2,sum);
+        };
+        # Incomplete cases
+        if(n1>0){
+          Total = Total + SumWorkResp(Y1=Y1,m0=M0[[j]],S0=S0[[j]],g=G1[,j]);
+        };
+        # Update
+        m1 = (Total)/N0[j];
+        names(m1) = lab;
+        return(m1);
       };
-      # Incomplete cases
-      if(n1>0){
-        Total = Total + SumWorkResp(Y1=Y1,m0=M0[[j]],S0=S0[[j]],g=G1[,j]);
-      };
-      # Update
-      m1 = (Total)/N0[j];
-      names(m1) = lab;
-      return(m1);
     };
     
     ## Update residual outer products
@@ -231,7 +238,7 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
     # Increment
     d = Q1-Q0;
     ## Output
-    Out = list("M"=M1,"S"=S1,"pi"=p1,"G"=G,"q"=Q1,"d"=d);
+    Out = list("M"=M1,"S"=S1,"pi"=p1,"G"=G,"Q1"=Q1,"Q0"=Q0,"d"=d);
     return(Out);
   }
   
@@ -247,6 +254,8 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
     }
     # Terminate if increment is below tolerance
     if(theta1$d<eps){
+      # If EM failes to perform any updates, keep initial objective
+      if(i==1){theta0$Q1=theta1$Q0};
       rm(theta1);
       break;
     };
@@ -263,8 +272,11 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
   
   ## Cluster assignments
   
-  # Final responsibilities
+  # Responsibilities
   G = rbind(theta0$G$G0,theta0$G$G1);
+  # Density evaluations
+  D = rbind(theta0$G$D0,theta0$G$D1);
+  
   # Assignments
   A = apply(G,1,which.max);
   A = cbind("ID"=c(ID0,ID1,ID2),"Assignment"=c(A,rep(NA,length(ID2))));
@@ -279,9 +291,42 @@ fit.mix = function(Y,k=2,M0=NULL,S0=NULL,pi0=NULL,maxit=100,eps=1e-6,report=F,pa
   rownames(G) = seq(1:nrow(G));
   G = data.frame(G[,-1,drop=F]);
   
+  # Density evaluations
+  D = cbind("ID"=c(ID0,ID1),D);
+  D = rbind(D,cbind("ID"=c(ID2),array(NA,dim=c(length(ID2),k))));
+  D = D[order(D[,1]),];
+  rownames(D) = seq(1:nrow(D));
+  D = data.frame(D[,-1,drop=F]);
+  
+  ## Create completed data
+  # Subjects with complete data
+  Y_Complete = Y0;
+  # Subjects with partial data
+  if(n1>0){
+    Y1_Complete = foreach(j=1:k,.combine="+") %do% {
+      return(WorkResp(Y1=Y1,m0=theta0$M[[j]],S0=theta0$S[[j]],g=theta0$G$G1[,j]));
+    };
+    Y_Complete = rbind(Y_Complete,Y1_Complete);
+  }
+  # Subjects with no data
+  if(n2>0){
+    mu = foreach(j=1:k,.combine="+") %do% {
+      return(theta0$M[[j]]*theta0$pi[j]);
+    };
+    Y2_Complete = foreach(i=1:length(ID2),.combine=rbind) %do% {
+      return(mu)
+    };
+    Y_Complete = rbind(Y_Complete,Y2_Complete);
+  }
+  # Add ID
+  Y_Complete = cbind(c(ID0,ID1,ID2),Y_Complete);
+  # Sort
+  Y_Complete = Y_Complete[order(Y_Complete[,1]),-1];
+  rownames(Y_Complete) = rownames(Y);
+
   ## Output
-  Out = new(Class="mix",Components=k,Means=theta0$M,Covariances=theta0$S,Proportions=theta0$pi,
-            Objective=theta0$q,Responsibilities=G,Assignments=A);
+  Out = new(Class="mix",Components=k,Means=theta0$M,Covariances=theta0$S,Proportions=theta0$pi,Objective=theta0$Q1,
+            Density=D,Responsibilities=G,Assignments=A,Completed=Y_Complete);
   return(Out);
 }
 

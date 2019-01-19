@@ -1,5 +1,5 @@
 # Purpose: Calculate E-step expectations of missing observations
-# Updated: 19/01/17
+# Updated: 19/01/18
 
 #' Responsibilities
 #' 
@@ -38,20 +38,21 @@ Responsibility = function(M,S,pi,Y0=NULL,Y1=NULL,parallel=F){
   
   ## Complete observations
   if(n0>0){
-    A0 = foreach(j=1:k,.combine=cbind) %do% {
+    D0 = foreach(j=1:k,.combine=cbind) %do% {
       return(dmvn(X=Y0,mu=M[[j]],sigma=S[[j]])*pi[j]);
     }
     # Normalize
-    G0 = aaply(.data=A0,.margins=1,.fun=function(x){x/sum(x)},.drop=F);
+    G0 = aaply(.data=D0,.margins=1,.fun=function(x){x/sum(x)},.drop=F);
     # Format
-    colnames(G0) = paste0("k",seq(1:k));
-    rownames(G0) = seq(1:n0);
+    colnames(D0) = colnames(G0) = paste0("k",seq(1:k));
+    rownames(D0) = rownames(G0) = seq(1:n0);
+    Out$D0 = D0;
     Out$G0 = G0;
   }
   
   ## Incomplete observations
   if(n1>0){
-    A1 = foreach(i=1:n1,.combine=rbind) %dopar% {
+    D1 = foreach(i=1:n1,.combine=rbind) %dopar% {
       # Current observation
       y = Y1[i,];
       key = !is.na(y);
@@ -74,11 +75,66 @@ Responsibility = function(M,S,pi,Y0=NULL,Y1=NULL,parallel=F){
     }
     
     # Normalize
-    G1 = aaply(.data=A1,.margins=1,.fun=function(x){x/sum(x)},.drop=F);
+    G1 = aaply(.data=D1,.margins=1,.fun=function(x){x/sum(x)},.drop=F);
     # Format
-    colnames(G1) = paste0("k",seq(1:k));
-    rownames(G1) = seq(1:n1);
+    colnames(D1) = colnames(G1) = paste0("k",seq(1:k));
+    rownames(D1) = rownames(G1) = seq(1:n1);
+    Out$D1 = D1;
     Out$G1 = G1;
+  }
+  return(Out);
+}
+
+#' Working Response Vectors
+#' 
+#' Calculate the working response vectors. 
+#'
+#' @param Y1 Incomplete observations.
+#' @param m0 Previous mean.
+#' @param S0 Previous covariance.
+#' @param g Responsibilities
+#' @return Numeric vector, the responsibility-weighted cumulative working
+#'   response vector.
+#' 
+#' @importFrom foreach foreach '%do%'
+
+WorkResp = function(Y1,m0,S0,g=NULL){
+  # Dimensions
+  d = ncol(Y1);
+  n1 = nrow(Y1);
+  
+  # Reponsibilities
+  if(is.null(g)){
+    g = rep(1,n1);
+  }
+  
+  # Loop over observations
+  i = 1;
+  Out = foreach(i=1:n1,.combine=rbind) %do% {
+    # Current observation
+    y = Y1[i,];
+    key = is.na(y);
+    
+    # Permutation
+    Perm = c(which(!key),which(key));
+    Rev_Perm = order(Perm);
+    
+    # Partition covariance
+    Cov_TS = S0[key,!key,drop=F];
+    Var_SS = S0[!key,!key,drop=F];
+    Var_SS_Inv = matInv(Var_SS);
+    
+    # Observed components
+    s = matrix(y[!key],ncol=1);
+    
+    # Conditional expectation of missing compoments
+    t = m0[key] + MMP(Cov_TS,MMP(Var_SS_Inv,s-m0[!key]));
+    
+    # Working response
+    Yhat = rbind(s,t);
+    
+    # Return
+    return(g[i]*Yhat[Rev_Perm])
   }
   return(Out);
 }

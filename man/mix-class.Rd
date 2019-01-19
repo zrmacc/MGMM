@@ -20,8 +20,12 @@ Defines the class returned by the fitting functions.
 
 \item{\code{Objective}}{Final value of the EM objective.}
 
-\item{\code{Responsibilities}}{Final cluster responsibilities.}
+\item{\code{Density}}{Cluter density at observation.}
 
-\item{\code{Assignments}}{Final cluster assignments.}
+\item{\code{Responsibilities}}{Posterior membership probabilities.}
+
+\item{\code{Assignments}}{Maximum a posteriori assignment.}
+
+\item{\code{Completed}}{Completed data, with missing values replaced by posterior expectations.}
 }}
 

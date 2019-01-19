@@ -32,7 +32,7 @@
 #' @importFrom stats rmultinom
 #' 
 #' @export
-#' @seealso For estimation, see \code{\link{fit.MNMix}}.
+#' @seealso For estimation, see \code{\link{fit.GMM}}.
 #' 
 #' @examples 
 #' \dontrun{
@@ -40,28 +40,28 @@
 #' # Single component without missingness
 #' # Bivariate normal observations
 #' Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
-#' Y = rMNMix(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);
+#' Y = rGMM(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);
 #' 
 #' # Single component with missingness
 #' # Trivariate normal observations
 #' M = list(c(-2,-2,-2),c(2,2,2));
 #' Sigma = matrix(c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1),nrow=3);
-#' Y = rMNMix(n=1e3,d=3,k=2,M=M,S=Sigma);
+#' Y = rGMM(n=1e3,d=3,k=2,M=M,S=Sigma);
 #' 
 #' # Two components without missingness
 #' # Trivariate normal observations
 #' Means = list(c(-2,-2,-2),c(2,2,2));
 #' Sigma = matrix(c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1),nrow=3);
-#' Y = rMNMix(n=1e3,d=3,k=2,M=Means,S=Sigma);
+#' Y = rGMM(n=1e3,d=3,k=2,M=Means,S=Sigma);
 #' 
 #' # Four components with missingness
 #' # Bivariate normal observations
 #' M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 #' S = 0.5*diag(2);
-#' Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
+#' Y = rGMM(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
 #' }
 
-rMNMix = function(n,d=2,k=1,pi,m=0,M,S){
+rGMM = function(n,d=2,k=1,pi,m=0,M,S){
   ## Input checks
   # Mixture proportions
   if(missing(pi)){pi = rep(1,k)/k} else {pi = pi/sum(pi)};

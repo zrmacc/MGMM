@@ -11,7 +11,7 @@
 #' @export
 #' @return Numeric matrix. 
 cov <- function(A, B, cor = FALSE) {
-    .Call('_MNMix_cov', PACKAGE = 'MNMix', A, B, cor)
+    .Call('_MGMM_cov', PACKAGE = 'MGMM', A, B, cor)
 }
 
 #' Matrix Determinant
@@ -22,7 +22,7 @@ cov <- function(A, B, cor = FALSE) {
 #' @return Scalar. 
 #' @export 
 det <- function(A) {
-    .Call('_MNMix_det', PACKAGE = 'MNMix', A)
+    .Call('_MGMM_det', PACKAGE = 'MGMM', A)
 }
 
 #' Matrix Inner Product
@@ -34,7 +34,7 @@ det <- function(A) {
 #' @return Numeric matrix. 
 #' @export 
 matIP <- function(A, B) {
-    .Call('_MNMix_matIP', PACKAGE = 'MNMix', A, B)
+    .Call('_MGMM_matIP', PACKAGE = 'MGMM', A, B)
 }
 
 #' Matrix Inverse
@@ -45,7 +45,7 @@ matIP <- function(A, B) {
 #' @return Numeric matrix. 
 #' @export 
 matInv <- function(A) {
-    .Call('_MNMix_matInv', PACKAGE = 'MNMix', A)
+    .Call('_MGMM_matInv', PACKAGE = 'MGMM', A)
 }
 
 #' Matrix Matrix Product
@@ -57,7 +57,7 @@ matInv <- function(A) {
 #' @return Numeric matrix. 
 #' @export 
 MMP <- function(A, B) {
-    .Call('_MNMix_MMP', PACKAGE = 'MNMix', A, B)
+    .Call('_MGMM_MMP', PACKAGE = 'MGMM', A, B)
 }
 
 #' Fast Outer Product
@@ -69,7 +69,7 @@ MMP <- function(A, B) {
 #' @return Numeric matrix.
 #' @export 
 matOP <- function(X, Y) {
-    .Call('_MNMix_matOP', PACKAGE = 'MNMix', X, Y)
+    .Call('_MGMM_matOP', PACKAGE = 'MGMM', X, Y)
 }
 
 #' Schur complement
@@ -82,7 +82,7 @@ matOP <- function(X, Y) {
 #' @return Numeric matrix. 
 #' @export 
 SchurC <- function(Ibb, Iaa, Iba) {
-    .Call('_MNMix_SchurC', PACKAGE = 'MNMix', Ibb, Iaa, Iba)
+    .Call('_MGMM_SchurC', PACKAGE = 'MGMM', Ibb, Iaa, Iba)
 }
 
 #' Matrix Trace
@@ -93,6 +93,6 @@ SchurC <- function(Ibb, Iaa, Iba) {
 #' @return Scalar.
 #' @export  
 tr <- function(A) {
-    .Call('_MNMix_tr', PACKAGE = 'MNMix', A)
+    .Call('_MGMM_tr', PACKAGE = 'MGMM', A)
 }
 

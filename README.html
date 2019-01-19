@@ -11,7 +11,7 @@
 
 <meta name="author" content="Zachary McCaw" />
 
-<meta name="date" content="2019-01-18" />
+<meta name="date" content="2019-01-19" />
 
 <title>README</title>
 
@@ -124,7 +124,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">README</h1>
 <h4 class="author"><em>Zachary McCaw</em></h4>
-<h4 class="date"><em>2019-01-18</em></h4>
+<h4 class="date"><em>2019-01-19</em></h4>
 
 </div>
 
@@ -144,24 +144,36 @@ $(document).ready(function () {
 <h1>Introduction</h1>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>Suppose that the data consist of independent random vectors. Each observation belongs to one of several distinct clusters. Conditional on cluster membership, the observation follows a multivariate normal distribution, with cluster-specific mean and covariance. The elements of an observation are subject to arbitrary patterns of missingness at random. Given such data, this package estimates the parameters of a Gaussian Mixture Model (GMM), including the marginal probabilities of cluster membership, and the cluster-specific means and covariances. For each observation, the posterior probabiity of membership to each cluster is calculated, and a maximum a posteriori classification is provided.</p>
+<p>This package implements clustering of multivariate normal random vectors with missing elements. Clustering is achieved by fitting a Gaussian Mixture Model (GMM). The parameters are estimated by maximum likelihood, using the Expectation Maximization (EM) algorithm. Our implementation extends existing methods by allowing for missingness in the input data. The EM algorithm addresses missingness of both the cluster assignments and the vector components. The output includes the marginal cluster membership probabilities; the mean and covariance of each cluster; the density of each mixture component evaluated on the observations; the posterior probabilities of cluster membership; maximum <em>a posteriori</em> cluster assignments; and a completed version of the input data, with missing values replaced by their posterior expectations.</p>
 </div>
 <div id="model" class="section level2">
 <h2>Model</h2>
-<p>Suppose that the data consist of <span class="math inline">\(n\)</span> random vectors <span class="math inline">\(y_{i}\)</span> in <span class="math inline">\(\mathbb{R}^{p}\)</span>. Each observation arises from one of <span class="math inline">\(k\)</span> distinct clusters. Let <span class="math inline">\(z_{ij} = 1\)</span> if observation <span class="math inline">\(i\)</span> belongs to cluster <span class="math inline">\(j\)</span>. The marginal probability of membership the <span class="math inline">\(j\)</span>th cluster is <span class="math inline">\(\pi_{j} = P[z_{i}=j]\)</span>. Conditional on membership to the <span class="math inline">\(j\)</span>th cluster, <span class="math inline">\(y_{i}\)</span> follows a multivariate normal distribution, with mean <span class="math inline">\(\mu_{j}\)</span> and covariance <span class="math inline">\(\Sigma_{j}\)</span>. The generative model is:</p>
+<p>Suppose the data consist of <span class="math inline">\(n\)</span> random vectors <span class="math inline">\(\{y_{i}\}_{i=1}^{n}\)</span> in <span class="math inline">\(\mathbb{R}^{d}\)</span>. Each observation <span class="math inline">\(y_{i}\)</span> arises from one of <span class="math inline">\(k\)</span> distinct clusters. Associate with each observation a <span class="math inline">\(k\times 1\)</span> vector of indicators <span class="math inline">\(z_{i}\)</span>, where <span class="math inline">\(z_{ij} = 1\)</span> if observation <span class="math inline">\(i\)</span> belongs to cluster <span class="math inline">\(j\)</span>. The marginal probability of membership the <span class="math inline">\(j\)</span>th cluster is <span class="math inline">\(\pi_{j} = P[z_{ij}=1]\)</span>. Conditional on membership to the <span class="math inline">\(j\)</span>th cluster, <span class="math inline">\(y_{i}\)</span> follows a multivariate normal distribution, with mean <span class="math inline">\(\mu_{j}\)</span> and covariance <span class="math inline">\(\Sigma_{j}\)</span>. The generative model is:</p>
 <p><span class="math display">\[
 z_{i} \sim \text{Multinomial}[\pi_{1},\cdots,\pi_{k}]
 \]</span></p>
 <p><span class="math display">\[
-y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
+y_{i}\big|(z_{ij}=1) \sim N\big(\mu_{j},\Sigma_{j}\big)
 \]</span></p>
-<p>The EM algorithm is used to obtain maximum likelihood estimates (MLEs) of the model parameters. The procedure treats both the unobserved elements of each random vector <span class="math inline">\(y_{i}\)</span>, and the unobserved cluster assignments <span class="math inline">\(z_{ij}\)</span> as missing data. From the MLEs, posterior probabilities of cluster membership are calculated as follows. Partition each observation <span class="math inline">\(y_{i}\)</span> as <span class="math inline">\((s_{i},\ t_{i})\)</span>, where <span class="math inline">\(s_{i}\)</span> denotes the observed elements, and <span class="math inline">\(t_{i}\)</span> denotes the missing elements. The posterior probability of membership to cluster <span class="math inline">\(j\)</span>, given the observed data <span class="math inline">\(s_{i}\)</span>, is:</p>
-<p><span class="math display">\[
-\gamma_{ij} = P[z_{i}=j|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
+<p>The marginal distribution of the observations is a GMM: <span class="math display">\[
+f(y_{i}) = \sum_{j=1}^{k}f(y_{i},z_{ij}=1) = \sum_{j=1}^{k}f(y_{i}|z_{ij}=1)P(z_{ij}=1) = \sum_{j=1}^{k}f(y_{j}|\mu_{j},\Sigma_{j})\pi_{j}
 \]</span></p>
-<p>The maximum a posteriori classificaiton for <span class="math inline">\(y_{i}\)</span> is:</p>
-<p><span class="math display">\[
-\arg\max_{j}\ \hat{\gamma}_{ij}
+<p>Each element <span class="math inline">\(y_{ik}\)</span> of <span class="math inline">\(y_{i}\)</span> is potentially missing at random (MAR). Associated with each observation a <span class="math inline">\(d\times 1\)</span> vector of indicators <span class="math inline">\(R_{i}\)</span>, where <span class="math inline">\(R_{ik}=1\)</span> if element <span class="math inline">\(k\)</span> of observation <span class="math inline">\(i\)</span> is observed. Partition each <span class="math inline">\(y_{i}\)</span> into its observed components <span class="math inline">\(s_{i}\)</span> and its unobserved components <span class="math inline">\(t_{i}\)</span>. That is, <span class="math inline">\(y_{ik}\)</span> belongs to <span class="math inline">\(s_{i}\)</span> if <span class="math inline">\(R_{ik}=1\)</span>, and belongs to <span class="math inline">\(t_{i}\)</span> if <span class="math inline">\(R_{ik}=0\)</span>. The missingness is at random if <span class="math inline">\((R_{ik}\perp y_{ik})|s_{i}\)</span> for each <span class="math inline">\(y_{ik}\)</span> in <span class="math inline">\(t_{i}\)</span>.</p>
+<p>Maximum likelihood estimates (MLEs) for the parameters of the GMM are obtained using the EM algorithm. During the E-step, both the cluster assignments <span class="math inline">\(z_{ij}\)</span> and the unobserved components <span class="math inline">\(t_{i}\)</span> of <span class="math inline">\(y_{i}\)</span> are treated as missing data. Suppose temporarily that all data were observed for observation <span class="math inline">\(i\)</span>. The contribution of subject <span class="math inline">\(i\)</span> to the <em>complete data</em> log likelihood would be: <span class="math display">\[
+\ell_{i} = \sum_{j=1}^{k}z_{ij}\ln\pi_{j}-\frac{1}{2}\sum_{j=1}^{k}z_{ij}\ln\det(\Sigma_{j})-\frac{1}{2}\sum_{j=1}^{k}z_{ij}(y_{i}-\mu_{j})\Sigma_{j}^{-1}(y_{i}-\mu_{j})
+\]</span></p>
+<p>Since <span class="math inline">\(z_{ij}\)</span> is never observed, and <span class="math inline">\(y_{i}\)</span> is incompletely observed, the complete data log likelihood cannot be evaluated. In the E-step, the EM objective is formed by taking the expectation of the complete data log likelihood, conditional on the observed data and the current parameter state: <span class="math display">\[
+q_{i}^{(r)} \equiv E[\ell_{i}|s_{i},\vartheta^{(r)}] = \sum_{j=1}^{k}\gamma_{ij}^{(r)}\ln\pi_{j}-\frac{1}{2}\sum_{j=1}^{k}\gamma_{ij}^{(r)}\ln\det(\Sigma_{j})-\frac{1}{2}\sum_{j=1}^{k}\text{tr}(\Sigma_{j}^{-1}V_{ij}^{(r)})
+\]</span></p>
+<p>Here <span class="math inline">\(s_{i}\)</span> is the observed data for subject <span class="math inline">\(i\)</span>; <span class="math inline">\(\vartheta^{(r)}\)</span> is the current parameter state; <span class="math inline">\(\gamma_{ij}^{(r)}\)</span> is the <em>responsibility</em>, defined as <span class="math inline">\(E[z_{ij}|s_{i},\vartheta^{(r)}]\)</span>; and <span class="math inline">\(V_{ij}^{(r)}\)</span> is the <em>expected residual outer product</em>, defined as <span class="math inline">\(E[z_{ij}(y_{i}-\mu_{j})(y_{i}-\mu_{j})'|s_{i},\vartheta^{(r)}]\)</span>. In the M-step, updates of the model parameters <span class="math inline">\(\vartheta\)</span> are obtained by maximizing the EM objective.</p>
+<p>Once the convergence criterion has been achieved, the responsibility, or posterior probability of cluster membership, is calculated as: <span class="math display">\[
+\gamma_{ij} = P[z_{ij}=1|s_{i}] = \frac{f(s_{i}|\ \mu_{j},\Sigma_{j})\pi_{j}}{\sum_{l=1}^{k}f(s_{i}|\ \mu_{l},\Sigma_{l})\pi_{l}}
+\]</span></p>
+<p>The maximum a posteriori classification for <span class="math inline">\(y_{i}\)</span> is given by: <span class="math display">\[
+A_{i} = \arg\max_{j}\ \gamma_{ij}
+\]</span></p>
+<p>For observation <span class="math inline">\(y_{i}\)</span>, posterior expectation of the missing elements <span class="math inline">\(t_{i}\)</span>, given the observed elements <span class="math inline">\(s_{i}\)</span>, is: <span class="math display">\[
+E[t_{i}|s_{i}] = \sum_{j=1}^{k}E[t_{i}|s_{i},z_{ij}=1]\pi_{j}
 \]</span></p>
 </div>
 </div>
@@ -169,38 +181,39 @@ y_{i}\big|(z_{i}=j) \sim N\big(\mu_{j},\Sigma_{j}\big)
 <h1>Data Generation</h1>
 <div id="description" class="section level2">
 <h2>Description</h2>
-<p>The function <code>rMNMix</code> simulates observations from a Gaussian Mixture Model. The number of observations is specified by <code>n</code>, and the dimension of each observation by <code>d</code>. The number of clusters is set using <code>k</code>, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector <code>pi</code>, which should contain <code>k</code> elements. If <span class="math inline">\(k&gt;0\)</span> but <code>pi</code> is omitted, the clusters are taken as equi-probable. The proportion of elements in the <span class="math inline">\(n \times d\)</span> data matrix that are missing is specified by <code>m</code>, which defaults to zero. Note that when <span class="math inline">\(m&gt;0\)</span> it is possible for all elements of an observation to go missing. The cluster means <code>M</code> are provided as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances <code>S</code> are provided as a numeric matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype.</p>
+<p>The function <code>rGMM</code> simulates observations from a Gaussian Mixture Model. The number of observations is specified by <code>n</code>, and the dimension of each observation by <code>d</code>. The number of clusters is set using <code>k</code>, which defaults to one. The marginal probabilities of cluster membership are provided as a numeric vector <code>pi</code>, which should contain <code>k</code> elements. If <span class="math inline">\(k&gt;0\)</span> but <code>pi</code> is omitted, the clusters are assumed equi-probable. The proportion of elements in the <span class="math inline">\(n \times d\)</span> data matrix that are missing is specified by <code>m</code>, which defaults to zero. Note that when <span class="math inline">\(m&gt;0\)</span> it is possible for all elements of an observation to be missing. The cluster means <code>M</code> are provided either as a numeric prototype vector, or a list of such vectors. If a single prototype is provided, that vector is used as the mean for all clusters. By default, the zero vector is adopted as the prototype. The cluster covariances <code>S</code> are provided as a numeric prototype matrix, or a list of such matrices. If a single prototype is provided, that matrix is used as the covariance for all clusters. By default, the identity matrix is adopted as the prototype.</p>
 </div>
 <div id="examples" class="section level2">
 <h2>Examples</h2>
 <div id="single-component-without-missingness" class="section level3">
 <h3>Single Component without Missingness</h3>
 <p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a single <code>k=1</code> bivariate normal distribution <code>d=2</code> without missingness. The mean is <span class="math inline">\(\mu=(2,2)\)</span>, and the covariance is an exchangeable correlation structure with off-diagonal <span class="math inline">\(\rho=0.5\)</span>.</p>
-<pre class="r"><code># Single component without missingness
+<pre class="r"><code>set.seed(100);
+# Single component without missingness
 Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
-Y = rMNMix(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);</code></pre>
+Y = rGMM(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);</code></pre>
 </div>
 <div id="single-component-with-missingness" class="section level3">
 <h3>Single Component with Missingness</h3>
 <p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a single <code>k=1</code> trivariate normal distribution <code>d=3</code> with 20% missingness <code>m=0.2</code>. The mean defaults to the zero vector, and the covariance to the identity matrix.</p>
 <pre class="r"><code># Single component with missingness
-Y = rMNMix(n=1e3,d=3,k=1,m=0.2);</code></pre>
+Y = rGMM(n=1e3,d=3,k=1,m=0.2);</code></pre>
 </div>
 <div id="two-components-without-missingness" class="section level3">
 <h3>Two Components without Missingness</h3>
-<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a two-coomponent <code>k=2</code> trivariate normal distribution <code>d=3</code> without missingness. The mean vectors are <span class="math inline">\(\mu_{1}=(-2,-2,-2)\)</span> and <span class="math inline">\(\mu_{2}=(2,2,2)\)</span>. The covariance matrices are both exchangeable with off-diagonal <span class="math inline">\(\rho=0.5\)</span>. Since <code>pi</code> is omitted, the cluster are equi-probable, i.e. <span class="math inline">\(\pi_{1}=\pi_{2}=1/2\)</span>.</p>
+<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a two-component <code>k=2</code> trivariate normal distribution <code>d=3</code> without missingness. The mean vectors are <span class="math inline">\(\mu_{1}=(-2,-2,-2)\)</span> and <span class="math inline">\(\mu_{2}=(2,2,2)\)</span>. The covariance matrices are both exchangeable with off-diagonal <span class="math inline">\(\rho=0.5\)</span>. Since <code>pi</code> is omitted, the cluster are equi-probable, i.e. <span class="math inline">\(\pi_{1}=\pi_{2}=1/2\)</span>.</p>
 <pre class="r"><code># Two-component mixture without missingness
 M = list(c(-2,-2,-2),c(2,2,2));
 Sigma = matrix(c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1),nrow=3);
-Y = rMNMix(n=1e3,d=3,k=2,M=M,S=Sigma);</code></pre>
+Y = rGMM(n=1e3,d=3,k=2,M=M,S=Sigma);</code></pre>
 </div>
 <div id="four-components-with-missingness" class="section level3">
 <h3>Four Components with Missingness</h3>
-<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a four-coomponent <code>k=4</code> bivariate normal distribution <code>d=2</code> with 10% missingness <code>m=0.1</code>. The mean vectors are <span class="math inline">\(\mu_{1}=(-2,-2)\)</span>, <span class="math inline">\(\mu_{2}=(-2,2)\)</span>, <span class="math inline">\(\mu_{3}=(2,-2)\)</span> and <span class="math inline">\(\mu_{4}=(2,2)\)</span>. The covariance matrices are all <span class="math inline">\(0.5*I\)</span>. The cluster proportions are (35%, 15%, 15%, 35%) for <span class="math inline">\((\pi_{1},\pi_{2},\pi_{3},\pi_{4})\)</span>, respectively.</p>
+<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a four-component <code>k=4</code> bivariate normal distribution <code>d=2</code> with 10% missingness <code>m=0.1</code>. The mean vectors are <span class="math inline">\(\mu_{1}=(-2,-2)\)</span>, <span class="math inline">\(\mu_{2}=(-2,2)\)</span>, <span class="math inline">\(\mu_{3}=(2,-2)\)</span> and <span class="math inline">\(\mu_{4}=(2,2)\)</span>. The covariance matrices are all <span class="math inline">\(0.5*I\)</span>. The cluster proportions are (35%, 15%, 15%, 35%) for <span class="math inline">\((\pi_{1},\pi_{2},\pi_{3},\pi_{4})\)</span>, respectively.</p>
 <pre class="r"><code># Four-component mixture with missingness
 M = list(c(-2,-2),c(-2,2),c(2,-2),c(2,2));
 S = 0.5*diag(2);
-Y = rMNMix(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);</code></pre>
+Y = rGMM(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);</code></pre>
 </div>
 </div>
 </div>
@@ -208,7 +221,7 @@ Y = rMNMix(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);</code></pre>
 <h1>Parameter Estimation</h1>
 <div id="description-1" class="section level2">
 <h2>Description</h2>
-<p>The function <code>fit.MNMix</code> estimates parameters for the Gaussian Mixture Model. The data are expected as a numeric matrix <code>Y</code>, with observations as rows. The number of mixture components is specified using <code>k</code>, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using <code>M0</code>, <code>S0</code>, and <code>pi0</code>, respectively. If the data <code>Y</code> contain complete observations, i.e. observations with no missing elements, <code>fit.MNMix</code> will attempt to initialize the model parameters (<span class="math inline">\(\mu,\Sigma,\pi\)</span>) via K-means. However, if the data <code>Y</code> contain no complete observations, then initial values are required for each of <code>M0</code>, <code>S0</code>, and <code>pi0</code>. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means <code>M0</code> are provided as a list of vectors, the covariances <code>S0</code> as a list of matrices, and the cluster proportions <code>pi0</code> as a numeric vector. Note that <code>M0</code> and <code>S0</code> are expected as lists even if the model only contains a single component <code>k=1</code>.</p>
+<p>The function <code>fit.GMM</code> estimates parameters of the GMM. The data are expected as a numeric matrix <code>Y</code>, with observations as rows. The number of mixture components is specified using <code>k</code>, which defaults to one. Initial values for the mean vectors, covariance matrices, and cluster proportions are provided using <code>M0</code>, <code>S0</code>, and <code>pi0</code>, respectively. If the data <code>Y</code> contain complete observations, i.e. observations with no missing elements, <code>fit.GMM</code> will attempt to initialize the model parameters (<span class="math inline">\(\mu,\Sigma,\pi\)</span>) via K-means. However, if the data <code>Y</code> contain no complete observations, then initial values are required for each of <code>M0</code>, <code>S0</code>, and <code>pi0</code>. Supplying initial values may also result in more accurate estimates when there are relatively few complete observations. The initial means <code>M0</code> are provided as a list of vectors, the covariances <code>S0</code> as a list of matrices, and the cluster proportions <code>pi0</code> as a numeric vector. Note that <code>M0</code> and <code>S0</code> are expected as lists even if the model only contains a single component <code>k=1</code>.</p>
 <p>The arguments <code>maxit</code>, <code>eps</code>, <code>report</code>, and <code>parallel</code> control the fitting procedure. <code>maxit</code> sets the maximum number of EM iterations to attempt. The default is <span class="math inline">\(10^{2}\)</span>. <code>eps</code> sets the minimum acceptable improvement in the EM objective function. The default is <span class="math inline">\(10^{-6}\)</span>. If <code>report=TRUE</code>, then fitting progress is displayed. For models with missingness and more than one mixture component <code>k&gt;1</code>, setting <code>parallel=TRUE</code> may improve run time. The parallel backend must be registered beforehand.</p>
 </div>
 <div id="examples-1" class="section level2">
@@ -218,90 +231,103 @@ Y = rMNMix(n=1e3,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);</code></pre>
 <p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated with a single bivariate normal distribution without missingness. Since the model contains only a single component, the output is a list containing the estimated mean and covariance. In the case of a single component without missingness, the maximum likelihood estimates are available in closed form.</p>
 <pre class="r"><code># Single component without missingness
 Sigma = matrix(c(1,0.5,0.5,1),nrow=2);
-Y = rMNMix(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);
-M = fit.MNMix(Y=Y,k=1);
+Y = rGMM(n=1e3,d=2,k=1,M=c(2,2),S=Sigma);
+M = fit.GMM(Y=Y,k=1);
 cat(&quot;Estimated Mean and Covariance:\n&quot;);
 show(M);</code></pre>
 <pre><code>## Estimated Mean and Covariance:
 ## $Mean
 ##       y1       y2 
-## 1.997693 2.010779 
+## 2.000419 1.975837 
 ## 
 ## $Covariance
 ##           y1        y2
-## y1 1.0335551 0.5215485
-## y2 0.5215485 1.0504981
+## y1 0.9712543 0.4798659
+## y2 0.4798659 1.0434352
 ## 
 ## $Objective
-## [1] -1792.507</code></pre>
+## [1] -1756.026</code></pre>
 </div>
 <div id="single-component-with-missingness-1" class="section level3">
 <h3>Single Component with Missingness</h3>
-<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a single trivariate normal distribution with 20% missingness. Since the model contains only a single component, the output is again a list. However, in the case of missingness, the EM algorithm is used for estimation. In addition to the estimated mean and covariance, the output now contains the final EM objective. The true mean is the zero vector, and the true covariance is identity. For <code>M1</code> below, the initial mean and covariance are estimated internally using complete observations. For <code>M2</code> below, the mean and covariance are initialized at the truth. The final value of the EM objective is increased by initializing at the truth.</p>
-<pre class="r"><code># Single component with missingness
-set.seed(100);
-Y = rMNMix(n=1e3,d=3,k=1,m=0.2);
+<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a single trivariate normal distribution with 20% missingness. Since the model contains only a single component, the output is again a list. However, in the case of missingness, the EM algorithm is used for estimation, and a completed version of the input data is returned, with missing values replaced by their posterior expectations.The true mean is the zero vector, and the true covariance is identity. For <code>M1</code> below, the initial mean and covariance are estimated internally using complete observations. For <code>M2</code> below, the mean and covariance are initialized at the truth. The final value of the EM objective is increased by initializing at the truth.</p>
+<pre class="r"><code>set.seed(101);
+# Single component with missingness
+Y = rGMM(n=1e3,d=3,k=1,m=0.2);
 cat(&quot;Initial parameter values set internally:\n&quot;);
-M1 = fit.MNMix(Y=Y,k=1);
-cat(&quot;\n&quot;);
-show(M1);
+M1 = fit.GMM(Y=Y,k=1);
+cat(&quot;\nEstimated mean:\n&quot;);
+show(M1$Mean);
+cat(&quot;\nEstimated covariance:\n&quot;);
+show(M1$Covariance);
+cat(&quot;\nFinal objective:\n&quot;);
+show(M1$Objective);
 cat(&quot;Initial parameter values set manually:\n&quot;);
 m0 = rep(0,3);
 S0 = diag(3);
-M2 = fit.MNMix(Y=Y,k=1,M0=list(m0),S0=list(S0));
-cat(&quot;\n&quot;);
-show(M2);
-cat(&quot;Gain in final objective by initializing parameters at the truth:\n&quot;)
+M2 = fit.GMM(Y=Y,k=1,M0=list(m0),S0=list(S0));
+cat(&quot;\nEstimated mean:\n&quot;);
+show(M1$Mean);
+cat(&quot;\nEstimated covariance:\n&quot;);
+show(M1$Covariance);
+cat(&quot;\nFinal objective:\n&quot;);
+show(M1$Objective);
+cat(&quot;\nGain in final objective by initializing parameters at the truth:\n&quot;)
 M2$Objective-M1$Objective;</code></pre>
 <pre><code>## Initial parameter values set internally:
-## Objective increment:  5.81 
-## Objective increment:  0.662 
-## Objective increment:  0.0976 
-## Objective increment:  0.0143 
-## Objective increment:  0.00147 
-## 5 update(s) performed before tolerance limit.
+## Objective increment:  6.41 
+## Objective increment:  0.633 
+## Objective increment:  0.0946 
+## Objective increment:  0.0168 
+## Objective increment:  0.00312 
+## Objective increment:  0.000556 
+## Objective increment:  7.71e-05 
+## 7 update(s) performed before tolerance limit.
 ## 
 ## 
-## $Mean
+## Estimated mean:
 ##          y1          y2          y3 
-##  0.05363057 -0.03032985  0.02118261 
+##  0.02821992 -0.01186953 -0.02684324 
 ## 
-## $Covariance
-##              y1            y2            y3
-## y1  0.995409482 -0.0272300548  0.0084440124
-## y2 -0.027230055  1.0377546994 -0.0008892942
-## y3  0.008444012 -0.0008892942  1.0590200651
+## Estimated covariance:
+##            y1           y2           y3
+## y1 1.02062945  0.069358137  0.021234977
+## y2 0.06935814  1.074999999 -0.005636683
+## y3 0.02123498 -0.005636683  0.980448577
 ## 
-## $Objective
-## [1] -3064.304
-## 
+## Final objective:
+## [1] -3034.353
 ## Initial parameter values set manually:
-## 0 update(s) performed before tolerance limit.
+## Objective increment:  3.97 
+## Objective increment:  0.185 
+## Objective increment:  0.00439 
+## 3 update(s) performed before tolerance limit.
 ## 
 ## 
-## $Mean
-## [1] 0 0 0
+## Estimated mean:
+##          y1          y2          y3 
+##  0.02821992 -0.01186953 -0.02684324 
 ## 
-## $Covariance
-##      [,1] [,2] [,3]
-## [1,]    1    0    0
-## [2,]    0    1    0
-## [3,]    0    0    1
+## Estimated covariance:
+##            y1           y2           y3
+## y1 1.02062945  0.069358137  0.021234977
+## y2 0.06935814  1.074999999 -0.005636683
+## y3 0.02123498 -0.005636683  0.980448577
 ## 
-## $Objective
-## NULL
+## Final objective:
+## [1] -3034.353
 ## 
 ## Gain in final objective by initializing parameters at the truth:
-## numeric(0)</code></pre>
+## [1] 0.09823569</code></pre>
 </div>
 <div id="two-components-without-missingness-1" class="section level3">
 <h3>Two Components without Missingness</h3>
-<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a two-component trivariate normal distribution without missingness. Since the model has multiple components, the output is an object of class <code>mix</code>. The show method displays the estimated cluster proportions and the final objective. The slots <code>@Means</code> and <code>@Covariances</code> contain lists of the estimated cluster means and covariances. The posterior probability of membership to each cluster is contained in the <code>@Responsibilities</code> slot, and the highest posterior probability classification of each observation is contained in the <code>@Assignments</code> slot.</p>
+<p>In this example, <span class="math inline">\(10^{3}\)</span> observations are simulated from a two-component, trivariate normal distribution without missingness. Since the model has multiple components, the output is an object of class <code>mix</code>. The <em>show method</em> displays the estimated cluster proportions and the final objective. The slots of the output contain the following: * <code>@Means</code> and <code>@Covariances</code>: lists of the estimated cluster means and covariances. * <code>@Density</code>: the cluster densities evaluated at the observations. * <code>@Responsibilities</code>: the posterior membership probabilities for each observation. * <code>@Assignments</code>: the maximum a posteriori cluster assignments. * <code>@Completed</code>: a completed version of the input data is returned, with missing values replaced by their posterior expectations</p>
 <pre class="r"><code># Two componets without missingness
 Means = list(c(-2,-2,-2),c(2,2,2));
 Sigma = matrix(c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1),nrow=3);
-Y = rMNMix(n=1e3,d=3,k=2,M=Means,S=Sigma);
-M = fit.MNMix(Y=Y,k=2,eps=1e-8);
+Y = rGMM(n=1e3,d=3,k=2,M=Means,S=Sigma);
+M = fit.GMM(Y=Y,k=2,maxit=10,eps=1e-8);
 cat(&quot;\n&quot;);
 show(M);
 cat(&quot;Cluster means:\n&quot;);
@@ -312,81 +338,67 @@ cat(&quot;Cluster responsibilities:\n&quot;);
 head(M@Responsibilities);
 cat(&quot;\nCluster assignments:\n&quot;);
 head(M@Assignments);</code></pre>
-<pre><code>## Objective increment:  0.396 
-## Objective increment:  0.034 
-## Objective increment:  0.00965 
-## Objective increment:  0.00282 
-## Objective increment:  0.000957 
-## Objective increment:  0.000395 
-## Objective increment:  0.000189 
-## Objective increment:  9.75e-05 
-## Objective increment:  5.22e-05 
-## Objective increment:  2.83e-05 
-## Objective increment:  1.54e-05 
-## Objective increment:  8.43e-06 
-## Objective increment:  4.61e-06 
-## Objective increment:  2.52e-06 
-## Objective increment:  1.38e-06 
-## Objective increment:  7.56e-07 
-## Objective increment:  4.14e-07 
-## Objective increment:  2.27e-07 
-## Objective increment:  1.24e-07 
-## Objective increment:  6.79e-08 
-## Objective increment:  3.72e-08 
-## Objective increment:  2.03e-08 
-## Objective increment:  1.11e-08 
-## Objective increment:  6.1e-09 
-## 23 update(s) performed before tolerance limit.
+<pre><code>## Objective increment:  0.456 
+## Objective increment:  0.0227 
+## Objective increment:  0.00479 
+## Objective increment:  0.00161 
+## Objective increment:  0.000641 
+## Objective increment:  0.000276 
+## Objective increment:  0.000124 
+## Objective increment:  5.62e-05 
+## Objective increment:  2.58e-05 
+## Objective increment:  1.18e-05 
+## 10 update(s) performed without reaching tolerance limit.
 ## 
 ## 
 ## Normal Mixture Model with 2 Components. 
 ## Cluster Proportions:
 ##    k1    k2 
-## 0.518 0.482 
+## 0.491 0.509 
 ## 
 ## Final Objective:
-##      k1 
-## -2982.3 
+##       k1 
+## -2828.15 
 ## 
 ## Cluster means:
 ## [[1]]
 ##        y1        y2        y3 
-## -1.949991 -1.912998 -1.982099 
+## -1.968374 -1.977109 -2.022991 
 ## 
 ## [[2]]
 ##       y1       y2       y3 
-## 1.964810 1.933682 1.956676 
+## 2.004663 1.969927 1.976144 
 ## 
 ## Cluster covariances:
 ## [[1]]
 ##           y1        y2        y3
-## y1 0.9347688 0.5095796 0.4896254
-## y2 0.5095796 1.0477300 0.4895118
-## y3 0.4896254 0.4895118 0.9365137
+## y1 0.9882814 0.5352541 0.5061826
+## y2 0.5352541 1.0098347 0.5847462
+## y3 0.5061826 0.5847462 1.0150855
 ## 
 ## [[2]]
-##          y1        y2        y3
-## y1 1.070444 0.5310510 0.5222580
-## y2 0.531051 1.0483091 0.5286882
-## y3 0.522258 0.5286882 1.0013230
+##           y1        y2        y3
+## y1 0.8619684 0.3846493 0.3556651
+## y2 0.3846493 0.9157168 0.4517638
+## y3 0.3556651 0.4517638 0.8882217
 ## 
 ## Cluster responsibilities:
 ##             k1           k2
-## 1 9.997767e-01 2.232718e-04
-## 2 1.693337e-03 9.983067e-01
-## 3 9.999994e-01 6.164588e-07
-## 4 9.910511e-01 8.948881e-03
-## 5 3.285010e-05 9.999671e-01
-## 6 4.350046e-08 1.000000e+00
+## 1 9.999937e-01 6.322548e-06
+## 2 8.252326e-06 9.999917e-01
+## 3 8.250334e-01 1.749666e-01
+## 4 9.235427e-08 9.999999e-01
+## 5 2.004523e-06 9.999980e-01
+## 6 9.999979e-01 2.134687e-06
 ## 
 ## Cluster assignments:
 ##   Assignment
 ## 1          1
 ## 2          2
 ## 3          1
-## 4          1
+## 4          2
 ## 5          2
-## 6          2</code></pre>
+## 6          1</code></pre>
 </div>
 <div id="four-components-with-missingness-1" class="section level3">
 <h3>Four Components with Missingness</h3>
@@ -395,8 +407,8 @@ head(M@Assignments);</code></pre>
 # Four components with missingness
 M = list(c(2,2),c(2,-2),c(-2,2),c(-2,-2));
 S = 0.5*diag(2);
-Y = rMNMix(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
-M = fit.MNMix(Y=Y,k=4,eps=1e-8);
+Y = rGMM(n=1000,d=2,k=4,pi=c(0.35,0.15,0.15,0.35),m=0.1,M=M,S=S);
+M = fit.GMM(Y=Y,k=4,maxit=10,eps=1e-8);
 show(M);
 cat(&quot;Cluster means:\n&quot;);
 M@Means;
@@ -412,47 +424,33 @@ head(M@Assignments);</code></pre>
 ## Objective increment:  17.1 
 ## Objective increment:  15.1 
 ## Objective increment:  14.1 
-## Objective increment:  14.1 
-## Objective increment:  14.3 
-## Objective increment:  15.1 
-## Objective increment:  15.4 
-## Objective increment:  15 
-## Objective increment:  13.2 
-## Objective increment:  10.7 
-## Objective increment:  7.68 
-## Objective increment:  5.26 
-## Objective increment:  3.31 
-## Objective increment:  2.02 
-## Objective increment:  1.12 
-## Objective increment:  0.574 
-## Objective increment:  0.207 
-## 24 update(s) performed before tolerance limit.
+## 10 update(s) performed without reaching tolerance limit.
 ## 
 ## Normal Mixture Model with 4 Components. 
 ## Cluster Proportions:
-##     k1     k2     k3     k4 
-## 0.0863 0.3220 0.2190 0.3730 
+##    k1    k2    k3    k4 
+## 0.170 0.303 0.171 0.356 
 ## 
 ## Final Objective:
 ##       k1 
-## -2649.01 
+## -3115.16 
 ## 
 ## Cluster means:
 ## [[1]]
 ##         y1         y2 
-## -0.9088869  0.4385624 
+## -0.8214704  0.7002373 
 ## 
 ## [[2]]
 ##       y1       y2 
-## 1.994131 1.992714 
+## 2.013224 2.026105 
 ## 
 ## [[3]]
-##          y1          y2 
-##  0.03938591 -0.03059968 
+##         y1         y2 
+##  0.4390973 -0.5140020 
 ## 
 ## [[4]]
 ##        y1        y2 
-## -2.038837 -2.006364 
+## -2.063338 -2.027735 
 ## 
 ## 
 ## Cluster assignments:

@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // cov
 SEXP cov(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B, const bool cor);
-RcppExport SEXP _MNMix_cov(SEXP ASEXP, SEXP BSEXP, SEXP corSEXP) {
+RcppExport SEXP _MGMM_cov(SEXP ASEXP, SEXP BSEXP, SEXP corSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // det
 SEXP det(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_det(SEXP ASEXP) {
+RcppExport SEXP _MGMM_det(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,7 +32,7 @@ END_RCPP
 }
 // matIP
 SEXP matIP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
-RcppExport SEXP _MNMix_matIP(SEXP ASEXP, SEXP BSEXP) {
+RcppExport SEXP _MGMM_matIP(SEXP ASEXP, SEXP BSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -44,7 +44,7 @@ END_RCPP
 }
 // matInv
 SEXP matInv(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_matInv(SEXP ASEXP) {
+RcppExport SEXP _MGMM_matInv(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -55,7 +55,7 @@ END_RCPP
 }
 // MMP
 SEXP MMP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B);
-RcppExport SEXP _MNMix_MMP(SEXP ASEXP, SEXP BSEXP) {
+RcppExport SEXP _MGMM_MMP(SEXP ASEXP, SEXP BSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -67,7 +67,7 @@ END_RCPP
 }
 // matOP
 SEXP matOP(const Eigen::Map<Eigen::MatrixXd> X, const Eigen::Map<Eigen::MatrixXd> Y);
-RcppExport SEXP _MNMix_matOP(SEXP XSEXP, SEXP YSEXP) {
+RcppExport SEXP _MGMM_matOP(SEXP XSEXP, SEXP YSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -79,7 +79,7 @@ END_RCPP
 }
 // SchurC
 SEXP SchurC(const Eigen::Map<Eigen::MatrixXd> Ibb, const Eigen::Map<Eigen::MatrixXd> Iaa, const Eigen::Map<Eigen::MatrixXd> Iba);
-RcppExport SEXP _MNMix_SchurC(SEXP IbbSEXP, SEXP IaaSEXP, SEXP IbaSEXP) {
+RcppExport SEXP _MGMM_SchurC(SEXP IbbSEXP, SEXP IaaSEXP, SEXP IbaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -92,7 +92,7 @@ END_RCPP
 }
 // tr
 SEXP tr(const Eigen::Map<Eigen::MatrixXd> A);
-RcppExport SEXP _MNMix_tr(SEXP ASEXP) {
+RcppExport SEXP _MGMM_tr(SEXP ASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,18 +103,18 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MNMix_cov", (DL_FUNC) &_MNMix_cov, 3},
-    {"_MNMix_det", (DL_FUNC) &_MNMix_det, 1},
-    {"_MNMix_matIP", (DL_FUNC) &_MNMix_matIP, 2},
-    {"_MNMix_matInv", (DL_FUNC) &_MNMix_matInv, 1},
-    {"_MNMix_MMP", (DL_FUNC) &_MNMix_MMP, 2},
-    {"_MNMix_matOP", (DL_FUNC) &_MNMix_matOP, 2},
-    {"_MNMix_SchurC", (DL_FUNC) &_MNMix_SchurC, 3},
-    {"_MNMix_tr", (DL_FUNC) &_MNMix_tr, 1},
+    {"_MGMM_cov", (DL_FUNC) &_MGMM_cov, 3},
+    {"_MGMM_det", (DL_FUNC) &_MGMM_det, 1},
+    {"_MGMM_matIP", (DL_FUNC) &_MGMM_matIP, 2},
+    {"_MGMM_matInv", (DL_FUNC) &_MGMM_matInv, 1},
+    {"_MGMM_MMP", (DL_FUNC) &_MGMM_MMP, 2},
+    {"_MGMM_matOP", (DL_FUNC) &_MGMM_matOP, 2},
+    {"_MGMM_SchurC", (DL_FUNC) &_MGMM_SchurC, 3},
+    {"_MGMM_tr", (DL_FUNC) &_MGMM_tr, 1},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_MNMix(DllInfo *dll) {
+RcppExport void R_init_MGMM(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

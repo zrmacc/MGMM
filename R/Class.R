@@ -1,5 +1,5 @@
 # Purpose: Define custom classes
-# Updated: 19/01/15
+# Updated: 19/01/18
 
 #' Mixture Model Class
 #'
@@ -10,14 +10,16 @@
 #' @slot Covariances Fitted cluster covariances.
 #' @slot Proportions Fitted cluster proportions.
 #' @slot Objective Final value of the EM objective. 
-#' @slot Responsibilities Final cluster responsibilities.
-#' @slot Assignments Final cluster assignments.
+#' @slot Density Cluter density at observation. 
+#' @slot Responsibilities Posterior membership probabilities.
+#' @slot Assignments Maximum a posteriori assignment.
+#' @slot Completed Completed data, with missing values replaced by posterior expectations. 
 #' @name mix-class
 #' @rdname mix-class
 #' @exportClass mix
 
-setClass(Class="mix",representation=representation(Components="numeric",Means="list",Covariances="list",Proportions="numeric",
-                                                   Objective="numeric",Responsibilities="data.frame",Assignments="data.frame"));
+setClass(Class="mix",representation=representation(Components="numeric",Means="list",Covariances="list",Proportions="numeric",Objective="numeric",
+                                                   Density="data.frame",Responsibilities="data.frame",Assignments="data.frame",Completed="matrix"));
 
 #' Print for Fitted Mixture Model
 #'

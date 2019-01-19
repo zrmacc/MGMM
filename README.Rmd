@@ -8,5 +8,5 @@ output:
 --- 
 
 # Package Vignette
-```{r,child='vignettes/MNMix.Rmd'}
+```{r,child='vignettes/MGMM.Rmd'}
 ```

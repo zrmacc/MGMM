@@ -4,13 +4,16 @@
 \alias{fit.mvn}
 \title{Fit Multivariate Normal Distribution}
 \usage{
-fit.mvn(Y, m0 = NULL, S0 = NULL, maxit = 100, eps = 1e-06,
-  report = T)
+fit.mvn(Y, m0 = NULL, fix.means = F, S0 = NULL, maxit = 100,
+  eps = 1e-06, report = T)
 }
 \arguments{
 \item{Y}{Numeric data matrix.}
 
 \item{m0}{Optional initial mean vector.}
+
+\item{fix.means}{Fix the means to their starting value? Must provide initial
+values.}
 
 \item{S0}{Optional initial covariance matrix.}
 

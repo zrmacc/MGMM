@@ -4,8 +4,8 @@
 \alias{fit.mix}
 \title{Fit Multivariate Mixture Distribution}
 \usage{
-fit.mix(Y, k = 2, M0 = NULL, S0 = NULL, pi0 = NULL, maxit = 100,
-  eps = 1e-06, report = F, parallel = F)
+fit.mix(Y, k = 2, M0 = NULL, fix.means = F, S0 = NULL,
+  pi0 = NULL, maxit = 100, eps = 1e-06, report = F, parallel = F)
 }
 \arguments{
 \item{Y}{Numeric data matrix.}
@@ -13,6 +13,9 @@ fit.mix(Y, k = 2, M0 = NULL, S0 = NULL, pi0 = NULL, maxit = 100,
 \item{k}{Number of mixture components. Defaults to 2.}
 
 \item{M0}{Optional list of initial mean vectors.}
+
+\item{fix.means}{Fix the means to their starting value? Must provide initial
+values.}
 
 \item{S0}{Optional list of initial covariance matrices.}
 

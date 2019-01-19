@@ -1,8 +1,8 @@
-Package: MNMix
-Title: Multivariate Normal Mixture Models
-Version: 0.2.0
+Package: MGMM
+Title: Missingness Aware Gaussian Mixture Models 
+Version: 0.2.2
 Authors@R: person("Zachary", "McCaw", email = "zmccaw@g.harvard.edu", role = c("aut", "cre"))
-Description: Parameter estimation for Gausian Mixture Models with one or more mixture components and arbitrary patterns of missingness at random in the input vectors. 
+Description: Parameter estimation for Gaussian Mixture Models (GMMs) allowing for missingness in the input vectors. Rather than imputing the missing inputs and clustering the completed data, this package uses the EM algorithm to accommodate both the missing inputs and the missing cluster assignments. Provides maximum likelihood estimates of model parameters, maximum a posteriori classifications of the inputs, and a completed version of the input data, with missing values replaced by their posterior expectations.
 Depends: R (>= 3.4.0)
 License: GPL-3
 Encoding: UTF-8
