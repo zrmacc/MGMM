@@ -38,9 +38,9 @@ Responsibility = function(M,S,pi,Y0=NULL,Y1=NULL,parallel=F){
   
   ## Complete observations
   if(n0>0){
-    D0 = foreach(j=1:k,.combine=cbind) %do% {
-      return(dmvn(X=Y0,mu=M[[j]],sigma=S[[j]])*pi[j]);
-    }
+    L = lapply(seq(1:k),function(j){dmvn(X=Y0,mu=M[[j]],sigma=S[[j]])*pi[j]});
+    D0 = do.call(cbind,L);
+    
     # Normalize
     G0 = aaply(.data=D0,.margins=1,.fun=function(x){x/sum(x)},.drop=F);
     # Format
@@ -60,15 +60,14 @@ Responsibility = function(M,S,pi,Y0=NULL,Y1=NULL,parallel=F){
       # Observed components
       s = y[key];
       
-      # Loop over clusters
-      Sub = foreach(j=1:k,.combine=c) %do% {
-        # Mean of observed components
+      # Function to evaluate density of observed components
+      aux = function(j){
         mij = M[[j]][key];
-        # Covariance of observed components
         Sij = S[[j]][key,key];
-        # Density contribution
         return(dmvn(X=s,mu=mij,sigma=Sij)*pi[j]);
-      };
+      }
+      
+      Sub = unlist(lapply(seq(1:k),aux));
       
       # Output
       return(Sub);
@@ -95,8 +94,6 @@ Responsibility = function(M,S,pi,Y0=NULL,Y1=NULL,parallel=F){
 #' @param g Responsibilities
 #' @return Numeric vector, the responsibility-weighted cumulative working
 #'   response vector.
-#' 
-#' @importFrom foreach foreach '%do%'
 
 WorkResp = function(Y1,m0,S0,g=NULL){
   # Dimensions
@@ -108,9 +105,8 @@ WorkResp = function(Y1,m0,S0,g=NULL){
     g = rep(1,n1);
   }
   
-  # Loop over observations
-  i = 1;
-  Out = foreach(i=1:n1,.combine=rbind) %do% {
+  # Body of "for loop"
+  aux = function(i){
     # Current observation
     y = Y1[i,];
     key = is.na(y);
@@ -134,8 +130,12 @@ WorkResp = function(Y1,m0,S0,g=NULL){
     Yhat = rbind(s,t);
     
     # Return
-    return(g[i]*Yhat[Rev_Perm])
+    return(g[i]*Yhat[Rev_Perm]);
   }
+  
+  # Loop over observations
+  L = lapply(seq(1:n1),aux);
+  Out = do.call(rbind,L);
   return(Out);
 }
 
@@ -149,8 +149,6 @@ WorkResp = function(Y1,m0,S0,g=NULL){
 #' @param g Responsibilities
 #' @return Numeric vector, the responsibility-weighted cumulative working
 #'   response vector.
-#' 
-#' @importFrom foreach foreach '%do%'
 
 SumWorkResp = function(Y1,m0,S0,g=NULL){
   # Dimensions
@@ -162,9 +160,8 @@ SumWorkResp = function(Y1,m0,S0,g=NULL){
     g = rep(1,n1);
   }
   
-  # Loop over observations
-  i = 1;
-  Out = foreach(i=1:n1,.combine="+") %do% {
+  # Body of "foor loop"
+  aux = function(i){
     # Current observation
     y = Y1[i,];
     key = is.na(y);
@@ -188,8 +185,12 @@ SumWorkResp = function(Y1,m0,S0,g=NULL){
     Yhat = rbind(s,t);
     
     # Return
-    return(g[i]*Yhat[Rev_Perm])
+    return(g[i]*Yhat[Rev_Perm]);
   }
+  
+  L = lapply(seq(1:n1),aux);
+  Out = Reduce("+",L);
+  # Output
   return(Out);
 }
 
@@ -205,8 +206,6 @@ SumWorkResp = function(Y1,m0,S0,g=NULL){
 #' 
 #' @return Numeric matrix, the responsibility-weighted, cumulative,
 #'  expected residual outer product. 
-#'  
-#' @importFrom foreach foreach '%do%'
 
 ExpResidOP = function(Y1,m1,m0,S0,g=NULL){
   # Dimensions
@@ -217,12 +216,9 @@ ExpResidOP = function(Y1,m1,m0,S0,g=NULL){
   if(is.null(g)){
     g = rep(1,n1);
   }
-  
-  # Output structure
-  
-  # Loop over observations
-  i = 1;
-  Out = foreach(i=1:n1,.combine="+") %do% {
+
+  # Body of "for loop"
+  aux = function(i){
     # Current observation
     y = Y1[i,];
     key = is.na(y);
@@ -266,6 +262,9 @@ ExpResidOP = function(Y1,m1,m0,S0,g=NULL){
     # Return
     return(g[i]*E);
   }
+  
+  L = lapply(seq(1:n1),aux);
+  Out = Reduce("+",L);
   # Output
   return(Out);
 }

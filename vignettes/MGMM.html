@@ -12,7 +12,7 @@
 
 <meta name="author" content="Zachary McCaw" />
 
-<meta name="date" content="2019-01-19" />
+<meta name="date" content="2019-01-24" />
 
 <title>Missingness Aware Gaussian Mixture Models</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Missingness Aware Gaussian Mixture Models</h1>
 <h4 class="author"><em>Zachary McCaw</em></h4>
-<h4 class="date"><em>2019-01-19</em></h4>
+<h4 class="date"><em>2019-01-24</em></h4>
 
 
 
@@ -218,50 +218,58 @@ M2 =<span class="st"> </span><span class="kw">fit.GMM</span>(<span class="dt">Y=
 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Gain in final objective by initializing parameters at the truth:</span><span class="ch">\n</span><span class="st">&quot;</span>)
 M2<span class="op">$</span>Objective<span class="op">-</span>M1<span class="op">$</span>Objective;</code></pre></div>
 <pre><code>## Initial parameter values set internally:
-## Objective increment:  6.41 
-## Objective increment:  0.633 
-## Objective increment:  0.0946 
-## Objective increment:  0.0168 
-## Objective increment:  0.00312 
-## Objective increment:  0.000556 
-## Objective increment:  7.71e-05 
-## 7 update(s) performed before tolerance limit.
+## Objective increment:  5.04 
+## Objective increment:  0.347 
+## Objective increment:  0.0363 
+## Objective increment:  0.00482 
+## Objective increment:  0.000702 
+## Objective increment:  0.000106 
+## Objective increment:  1.62e-05 
+## Objective increment:  2.51e-06 
+## Objective increment:  3.92e-07 
+## 8 update(s) performed before tolerance limit.
 ## 
 ## 
 ## Estimated mean:
 ##          y1          y2          y3 
-##  0.02821992 -0.01186953 -0.02684324 
+##  0.02824355 -0.01192471 -0.02684598 
 ## 
 ## Estimated covariance:
-##            y1           y2           y3
-## y1 1.02062945  0.069358137  0.021234977
-## y2 0.06935814  1.074999999 -0.005636683
-## y3 0.02123498 -0.005636683  0.980448577
+##            y1          y2          y3
+## y1 1.02102393  0.06697893  0.02144484
+## y2 0.06697893  1.07455370 -0.00571445
+## y3 0.02144484 -0.00571445  0.97890537
 ## 
 ## Final objective:
-## [1] -3034.353
+## [1] -3033.05
 ## Initial parameter values set manually:
-## Objective increment:  3.97 
-## Objective increment:  0.185 
-## Objective increment:  0.00439 
-## 3 update(s) performed before tolerance limit.
+## Objective increment:  4.91 
+## Objective increment:  0.344 
+## Objective increment:  0.0372 
+## Objective increment:  0.00499 
+## Objective increment:  0.000723 
+## Objective increment:  0.000108 
+## Objective increment:  1.65e-05 
+## Objective increment:  2.53e-06 
+## Objective increment:  3.94e-07 
+## 8 update(s) performed before tolerance limit.
 ## 
 ## 
 ## Estimated mean:
 ##          y1          y2          y3 
-##  0.02821992 -0.01186953 -0.02684324 
+##  0.02824355 -0.01192471 -0.02684598 
 ## 
 ## Estimated covariance:
-##            y1           y2           y3
-## y1 1.02062945  0.069358137  0.021234977
-## y2 0.06935814  1.074999999 -0.005636683
-## y3 0.02123498 -0.005636683  0.980448577
+##            y1          y2          y3
+## y1 1.02102393  0.06697893  0.02144484
+## y2 0.06697893  1.07455370 -0.00571445
+## y3 0.02144484 -0.00571445  0.97890537
 ## 
 ## Final objective:
-## [1] -3034.353
+## [1] -3033.05
 ## 
 ## Gain in final objective by initializing parameters at the truth:
-## [1] 0.09823569</code></pre>
+## [1] -0.00263237</code></pre>
 </div>
 <div id="two-components-without-missingness-1" class="section level3">
 <h3>Two Components without Missingness</h3>
@@ -281,16 +289,16 @@ M<span class="op">@</span>Covariances;
 <span class="kw">head</span>(M<span class="op">@</span>Responsibilities);
 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Cluster assignments:</span><span class="ch">\n</span><span class="st">&quot;</span>);
 <span class="kw">head</span>(M<span class="op">@</span>Assignments);</code></pre></div>
-<pre><code>## Objective increment:  0.456 
-## Objective increment:  0.0227 
-## Objective increment:  0.00479 
-## Objective increment:  0.00161 
-## Objective increment:  0.000641 
-## Objective increment:  0.000276 
-## Objective increment:  0.000124 
-## Objective increment:  5.62e-05 
-## Objective increment:  2.58e-05 
-## Objective increment:  1.18e-05 
+<pre><code>## Objective increment:  0.413 
+## Objective increment:  0.0155 
+## Objective increment:  0.00206 
+## Objective increment:  0.000399 
+## Objective increment:  8.35e-05 
+## Objective increment:  1.77e-05 
+## Objective increment:  3.77e-06 
+## Objective increment:  8.03e-07 
+## Objective increment:  1.71e-07 
+## Objective increment:  3.65e-08 
 ## 10 update(s) performed without reaching tolerance limit.
 ## 
 ## 
@@ -300,48 +308,47 @@ M<span class="op">@</span>Covariances;
 ## 0.491 0.509 
 ## 
 ## Final Objective:
-##       k1 
-## -2828.15 
+## [1] -2824.66
 ## 
 ## Cluster means:
 ## [[1]]
 ##        y1        y2        y3 
-## -1.968374 -1.977109 -2.022991 
+## -1.968437 -1.977193 -2.023005 
 ## 
 ## [[2]]
 ##       y1       y2       y3 
-## 2.004663 1.969927 1.976144 
+## 2.004623 1.969909 1.976056 
 ## 
 ## Cluster covariances:
 ## [[1]]
 ##           y1        y2        y3
-## y1 0.9882814 0.5352541 0.5061826
-## y2 0.5352541 1.0098347 0.5847462
-## y3 0.5061826 0.5847462 1.0150855
+## y1 0.9887028 0.5325819 0.5084598
+## y2 0.5325819 1.0079798 0.5857195
+## y3 0.5084598 0.5857195 1.0145138
 ## 
 ## [[2]]
 ##           y1        y2        y3
-## y1 0.8619684 0.3846493 0.3556651
-## y2 0.3846493 0.9157168 0.4517638
-## y3 0.3556651 0.4517638 0.8882217
+## y1 0.8615654 0.3846915 0.3563427
+## y2 0.3846915 0.9152830 0.4520967
+## y3 0.3563427 0.4520967 0.8876795
 ## 
 ## Cluster responsibilities:
 ##             k1           k2
-## 1 9.999937e-01 6.322548e-06
-## 2 8.252326e-06 9.999917e-01
-## 3 8.250334e-01 1.749666e-01
-## 4 9.235427e-08 9.999999e-01
-## 5 2.004523e-06 9.999980e-01
-## 6 9.999979e-01 2.134687e-06
+## 1 9.999936e-01 6.362776e-06
+## 2 8.203618e-06 9.999918e-01
+## 3 8.251460e-01 1.748540e-01
+## 4 9.096070e-08 9.999999e-01
+## 5 1.937815e-06 9.999981e-01
+## 6 9.999979e-01 2.144706e-06
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          1
-## 2          2
-## 3          1
-## 4          2
-## 5          2
-## 6          1</code></pre>
+##   Assignment      Entropy
+## 1          1 1.190132e-04
+## 2          2 1.504379e-04
+## 3          1 6.686892e-01
+## 4          2 2.258816e-06
+## 5          2 3.956986e-05
+## 6          1 4.348066e-05</code></pre>
 </div>
 <div id="four-components-with-missingness-1" class="section level3">
 <h3>Four Components with Missingness</h3>
@@ -357,53 +364,52 @@ M =<span class="st"> </span><span class="kw">fit.GMM</span>(<span class="dt">Y=<
 M<span class="op">@</span>Means;
 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Cluster assignments:</span><span class="ch">\n</span><span class="st">&quot;</span>);
 <span class="kw">head</span>(M<span class="op">@</span>Assignments);</code></pre></div>
-<pre><code>## Objective increment:  6980 
-## Objective increment:  168 
-## Objective increment:  90.9 
-## Objective increment:  57.4 
-## Objective increment:  36.8 
-## Objective increment:  26.9 
-## Objective increment:  20.6 
-## Objective increment:  17.1 
-## Objective increment:  15.1 
-## Objective increment:  14.1 
+<pre><code>## Objective increment:  0.494 
+## Objective increment:  0.021 
+## Objective increment:  0.0027 
+## Objective increment:  0.000246 
+## Objective increment:  3.91e-05 
+## Objective increment:  4.3e-06 
+## Objective increment:  7.94e-07 
+## Objective increment:  9.21e-08 
+## Objective increment:  2.03e-08 
+## Objective increment:  2.4e-09 
 ## 10 update(s) performed without reaching tolerance limit.
 ## 
 ## Normal Mixture Model with 4 Components. 
 ## Cluster Proportions:
 ##    k1    k2    k3    k4 
-## 0.170 0.303 0.171 0.356 
+## 0.154 0.327 0.132 0.388 
 ## 
 ## Final Objective:
-##       k1 
-## -3115.16 
+## [1] -1848.44
 ## 
 ## Cluster means:
 ## [[1]]
-##         y1         y2 
-## -0.8214704  0.7002373 
+##        y1        y2 
+## -2.063251  2.038524 
 ## 
 ## [[2]]
 ##       y1       y2 
-## 2.013224 2.026105 
+## 1.973261 1.959481 
 ## 
 ## [[3]]
-##         y1         y2 
-##  0.4390973 -0.5140020 
+##        y1        y2 
+##  1.985991 -2.032505 
 ## 
 ## [[4]]
 ##        y1        y2 
-## -2.063338 -2.027735 
+## -2.003837 -1.965708 
 ## 
 ## 
 ## Cluster assignments:
-##   Assignment
-## 1          2
-## 2          3
-## 3          4
-## 4          4
-## 5          2
-## 6          2</code></pre>
+##   Assignment      Entropy
+## 1          2 9.664253e-04
+## 2          3 4.775996e-05
+## 3          4 1.851588e-09
+## 4          4 3.546604e-07
+## 5          2 3.451421e-03
+## 6          2 4.464789e-01</code></pre>
 </div>
 </div>
 </div>
@@ -428,16 +434,16 @@ Q<span class="op">$</span>DBI;
 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">SIL:</span><span class="ch">\n</span><span class="st">&quot;</span>);
 Q<span class="op">$</span>SIL;</code></pre></div>
 <pre><code>## BIC:
-## [1] 615.1913
+## [1] 377.0455
 ## 
 ## CHI:
-## [1] 1.616594
+## [1] 6.546848
 ## 
 ## DBI:
-## [1] 2.071082
+## [1] 0.5617234
 ## 
 ## SIL:
-## [1] 0.5060318</code></pre>
+## [1] 0.545614</code></pre>
 </div>
 <div id="choosing-the-number-of-clusters" class="section level2">
 <h2>Choosing the Number of Clusters</h2>
@@ -448,27 +454,27 @@ K =<span class="st"> </span><span class="kw">chooseK</span>(<span class="dt">Y=<
 K<span class="op">$</span>Choices;
 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">All results:</span><span class="ch">\n</span><span class="st">&quot;</span>);
 <span class="kw">head</span>(K<span class="op">$</span>Results);</code></pre></div>
-<pre><code>## Cluster size 2 complete.
-## Cluster size 3 complete.
-## Cluster size 4 complete.
-## Cluster size 5 complete.
-## Cluster size 6 complete.
+<pre><code>## Cluster size 2 complete. 10 fit(s) succeeded.
+## Cluster size 3 complete. 10 fit(s) succeeded.
+## Cluster size 4 complete. 10 fit(s) succeeded.
+## Cluster size 5 complete. 10 fit(s) succeeded.
+## Cluster size 6 complete. 10 fit(s) succeeded.
 ## 
 ## Cluster number choices:
 ##   Metric kopt Metric_kopt k1se Metric_k1se
-## 1    BIC    4 614.6246030    4 614.6246030
-## 2    CHI    4   1.4358656    4   1.4358656
-## 3    DBI    2   2.0758853    2   2.0758853
-## 4    SIL    5   0.4369034    2   0.4320283
+## 1    BIC    6 309.6693323    6 309.6693323
+## 2    CHI    6  10.2771698    6  10.2771698
+## 3    DBI    4   0.5665089    4   0.5665089
+## 4    SIL    4   0.5632145    4   0.5632145
 ## 
 ## All results:
-##   Clusters Metric        Mean           SE
-## 1        2    BIC 654.8777210  4.815659269
-## 2        2    CHI   0.5437773  0.111736638
-## 3        2    DBI   2.0758853  0.214228576
-## 4        2    SIL   0.4320283  0.005596724
-## 5        3    BIC 655.1132886 10.988737315
-## 6        3    CHI   1.0258463  0.133998188</code></pre>
+##   Clusters Fits Metric        Mean          SE
+## 1        2   10    BIC 458.7355281 3.782973063
+## 2        2   10    CHI   1.6493055 0.053030528
+## 3        2   10    DBI   1.0071033 0.015690380
+## 4        2   10    SIL   0.4429571 0.005693376
+## 5        3   10    BIC 395.7053909 8.024156362
+## 6        3   10    CHI   3.3850195 0.156225892</code></pre>
 </div>
 </div>
 

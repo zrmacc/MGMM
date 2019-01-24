@@ -1,5 +1,5 @@
 # Purpose: Functions to evaluate clustering quality and choose k
-# Updated: 19/01/19
+# Updated: 19/01/24
 # Note: Quality metrics must accommodate the case of empty clusters. 
 
 ########################
@@ -12,52 +12,56 @@
 #' 
 #' @param Y Observations
 #' @param a Assignments
-#' @param M List of cluster means
-#' @return Scalar. 
-#' 
-#' @importFrom foreach foreach '%do%'
+#' @param m List of cluster means
+#' @return Scalar.
 
-CalHar = function(Y,a,M){
+CalHar = function(Y,a,m){
   # Clusters
   labs = sort(unique(a));
   k = length(labs);
   n = nrow(Y);
   
   ## Total within cluster dispersion
-  i = j = 1;
-  # Loop over clusters
-  W = foreach(j=1:k,.combine="+") %do% {
+  aux = function(j){
     # Subset obserations in cluster
     key = labs[j];
     Sub = Y[a==key,,drop=F];
     nj = nrow(Sub);
-    mj = M[[key]];
+    mj = m[[key]];
     # Loop over obs in cluster
-    Wj = foreach(i=1:nj,.combine="+") %do% {
-      e = Sub[i,]-mj;
-      return(matOP(e,e));
-    }
+    aux1 = function(i){return(matOP(Sub[i,]-mj,Sub[i,]-mj))};
+    L = lapply(seq(1:nj),aux1);
+    Wj = Reduce("+",L);
     return(Wj);  
-  }
+  };
+  # Within cluster dispersion
+  L = lapply(seq(1:k),aux);
+  W = Reduce("+",L);
   
-  # Grand mean
-  total = foreach(j=1:k,.combine="+") %do% {
+  ## Grand mean
+  aux = function(j){
     key = labs[j];
     nj = sum(a==key);
-    if(nj>0){return(M[[key]])};
+    if(nj>0){return(m[[key]])};
   }
-  m = total/k;
+  # Grand total
+  L = lapply(seq(1:k),aux);
+  Total = Reduce("+",L);
+  # Grand mean
+  mu = Total/k;
   
   ## Total between cluster disperson
-  B = foreach(j=1:k,.combine="+") %do% {
+  aux = function(j){
     # Subset obserations in cluster
     key = labs[j];
     nj = sum(a==key);
-    mj = M[[key]];
-    e = (mj-m);
+    mj = m[[key]];
+    e = (mj-mu);
     return(matOP(e,e));
   };
-  
+  # Between cluster dispersion
+  L = lapply(seq(1:k),aux);
+  B = Reduce("+",L);
   # CH statistic
   Out = tr(B)/tr(W)*(n-k)/(k-1);
   return(Out);
@@ -69,59 +73,56 @@ CalHar = function(Y,a,M){
 #' 
 #' @param Y Observations
 #' @param a Assignments
-#' @param M List of cluster means
-#' @return Scalar. 
-#' 
-#' @importFrom foreach foreach '%do%'
+#' @param m List of cluster means
+#' @return Scalar.
 
-DavBou = function(Y,a,M){
+DavBou = function(Y,a,m){
   # Clusters
   labs = sort(unique(a));
   k = length(labs);
   
   ## Cluster Diameters
-  i = j = 1;
-  # Loop over clusters
-  D = foreach(j=1:k,.combine=c) %do% {
+  aux = function(j){
     # Subset obserations in cluster
     key = labs[j];
     Sub = Y[a==key,,drop=F];
     nj = nrow(Sub);
-    mj = M[[key]];
+    mj = m[[key]];
     # Loop over obs in cluster
-    Dj = foreach(i=1:nj,.combine=c) %do% {
+    aux1 = function(i){
       e = Sub[i,]-mj;
       d = sqrt(sum(e^2));
       return(d);
-    }
+    };
+    Dj = unlist(lapply(seq(1:nj),aux1));
     return(mean(Dj));
   }
+  # Diameters
+  D = unlist(lapply(seq(1:k),aux));
   
   ## Calculate statistic
-  Stat = foreach(j=1:k,.combine=c) %do% {
+  aux = function(j){
     # Current cluster
     key1 = labs[j];
-    mj = M[[key1]];
+    mj = m[[key1]];
     # Index is j, not key1, since D has only length(labs) elements. 
     Dj = D[j];
-    Sij = foreach(i=1:k,.combine=c) %do% {
+    aux1 = function(i){
       key2 = labs[i];
-      mi = M[[key2]];
+      mi = m[[key2]];
       e = (mi-mj);
       d = sqrt(sum(e^2));
       if(d>0){
         return((D[i]+Dj)/d);
       }
     };
+    Sij = unlist(lapply(seq(1:k),aux1));
     # Maximum of similarity score
     return(max(Sij));
-  };
-  
-  # Average
-  Out = mean(Stat);
-  
+  }
+  Stat = unlist(lapply(seq(1:k),aux));
   # Output
-  return(Out);
+  return(mean(Stat));
 }
 
 #' Cluster Quality 
@@ -166,10 +167,10 @@ clustQual = function(M){
   Out$BIC = log(n)*(3*k)-M@Objective;
   
   ## Calinski-Harabaz Index
-  Out$CHI = CalHar(Y=Y,a=a,M=M@Means);
+  Out$CHI = CalHar(Y=Y,a=a,m=M@Means);
   
   ## Davies-Bouldin Index
-  Out$DBI = DavBou(Y=Y,a=a,M=M@Means);
+  Out$DBI = DavBou(Y=Y,a=a,m=M@Means);
   
   ## Silhouette
   Sil = silhouette(x=a,dist=dist(x=Y,method="euclidean"));

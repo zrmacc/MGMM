@@ -4,14 +4,14 @@
 \alias{CalHar}
 \title{Calinski-Harabaz Index}
 \usage{
-CalHar(Y, a, M)
+CalHar(Y, a, m)
 }
 \arguments{
 \item{Y}{Observations}
 
 \item{a}{Assignments}
 
-\item{M}{List of cluster means}
+\item{m}{List of cluster means}
 }
 \value{
 Scalar.

@@ -1,5 +1,5 @@
 # Purpose: Fitting function for fitting a single multivariate normal with missingness.
-# Updated: 19/01/18
+# Updated: 19/01/24
 
 ########################
 # Main Function
@@ -23,9 +23,11 @@
 #' @importFrom stats complete.cases
 
 fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
+  # Input dimensions
+  lab = colnames(Y);
+  d = ncol(Y);
   # Check for missingness
   Miss = sum(is.na(Y))>0;
-  lab = colnames(Y);
   
   ## If missingness is absent:
   if(!Miss){
@@ -37,10 +39,12 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
       m1 = apply(Y,2,mean);
       names(m1) = lab;
     };
+    
     # Covariance
     S1 = cov(Y,Y);
     rownames(S1) = colnames(S1) = lab;
     L1 = matInv(S1);
+    
     # Objective
     n = nrow(Y);
     V = matIP(Y-m1,Y-m1);
@@ -49,53 +53,59 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
     ## Output
     Out = list("Mean"=m1,"Covariance"=S1,"Objective"=Q);
     return(Out);
-  } else {
-    ## If missingness is present:
-    # Dimensions
-    d = ncol(Y);
-    ID = seq(1:nrow(Y));
+  };
+  
+  ## If missingness is present:
+  if(Miss){
     
-    # Partition
+    ## Partition Data
+    # Identifiers
+    ID = seq(1:nrow(Y));
     ind = complete.cases(Y);
-    # Complete observations
+    # Complete obs
     Y0 = Y[ind,];
     ID0 = ID[ind];
     n0 = nrow(Y0);
-    if(n0>0){
-      # Sum of complete observations
-      t0 = apply(Y0,2,sum);
-      # Incomplete observations
-      Y1 = Y[!ind,];
-      ID1 = ID[!ind];
-      # Exclude completely missing observations
-      aux = function(x){sum(is.na(x))!=d};
-      keep = apply(Y1,1,aux);
-      ID2 = ID1[!keep];
-      Y1 = Y1[keep,];
-      ID1 = ID1[keep];
-      n1 = nrow(Y1);
-      n2 = length(ID2);
-      n = n0+n1;
-    } else {
-      if(is.null(m0)|is.null(S0)){
-        stop("If no observations are complete, initial values are required for all parameters.")
-      };
-    };
+    t0 = apply(Y0,2,sum);
+    # Incomplete obs
+    Y1 = Y[!ind,];
+    ID1 = ID[!ind];
+    # Find completely missing obs
+    keep = apply(Y1,1,FUN=function(x){sum(is.na(x))!=d});
+    ID2 = ID1[!keep];
+    # Separate partially and completely missing obs
+    Y1 = Y1[keep,];
+    ID1 = ID1[keep];
+    n1 = nrow(Y1);
+    n2 = length(ID2);
+    n = n0+n1;
     
     ## Initialization
-    theta0 = theta1 = list();
-    # Initial values
-    if(n0>0){
-      theta0$m = apply(Y0,2,mean);
-      theta0$S = cov(Y0,Y0);
+    theta0 = list();
+
+    # Case 1: Both m0 and S0 provided
+    if(!is.null(m0)&!is.null(S0)){
+      theta0$m=m0;
+      theta0$S=S0;
+    # Case 2: At least one of m0 or S0 is null
     } else {
-      if(is.null(m0)|is.null(S0)){
-        stop("If no observations are complete, initial values are required for all parameters.")
-      };
-    };
-    # Overwrite if initial values were provided
-    if(!is.null(m0)){theta0$m=m0};
-    if(!is.null(S0)){theta0$S=S0};
+      # Check for complete obs
+      if(n0==0){
+        stop("If no observations are complete, initial values are required for all parameters.");
+      }
+      # Initialize mean if null
+      if(is.null(m0)){
+        theta0$m = apply(Y0,2,mean);
+      } else {
+        theta0$m = m0;
+      }
+      # Initialize covariance if null
+      if(is.null(S0)){
+        theta0$S = cov(Y0,Y0);
+      } else {
+        theta0$S = S0;
+      }
+    }; # End Case 2. 
     
     ## Define update function
     Update = function(theta){
@@ -105,7 +115,9 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
       L0 = matInv(S0);
       
       ## Initial objective
-      V0 = matIP(Y0-m0,Y0-m0);
+      M0 = matrix(data=m0,nrow=n0,ncol=d,byrow=T);
+      E0 = Y0-M0;
+      V0 = matIP(E0,E0);
       V1 = ExpResidOP(Y1=Y1,m1=m0,m0=m0,S0=S0);
       Q0 = (-n)*log(det(S0))-tr(MMP(L0,V0+V1));
       
@@ -131,7 +143,9 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
       
       # Complete observations
       if(n0>0){
-        V0 = matIP(Y0-m1,Y0-m1);
+        M1 = matrix(data=m1,nrow=n0,ncol=d,byrow=T);
+        E1 = Y0-M1;
+        V0 = matIP(E1,E1);
         S1 = S1+V0;
       }
       # Incomplete observations
@@ -188,9 +202,7 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
     Y1_Complete = WorkResp(Y1=Y1,m0=theta0$m,S0=theta0$S);
     Y_Complete = rbind(Y_Complete,Y1_Complete);
     if(n2>0){
-      Y2_Complete = foreach(i=1:length(ID2),.combine=rbind) %do% {
-        return(theta0$m);
-      };
+      Y2_Complete = matrix(data=theta0$m,nrow=n2,ncol=d,byrow=T);
       Y_Complete = rbind(Y_Complete,Y2_Complete);
     }
     # Order
@@ -200,6 +212,7 @@ fit.mvn = function(Y,m0=NULL,fix.means=F,S0=NULL,maxit=100,eps=1e-6,report=T){
     
     ## Output
     Out = list("Mean"=theta0$m,"Covariance"=theta0$S,"Objective"=theta0$Q1,"Completed"=Y_Complete);
-    return(Out);
+    return(Out);  
   };
+  
 };

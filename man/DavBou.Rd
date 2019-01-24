@@ -4,14 +4,14 @@
 \alias{DavBou}
 \title{Davies-Bouldin Index}
 \usage{
-DavBou(Y, a, M)
+DavBou(Y, a, m)
 }
 \arguments{
 \item{Y}{Observations}
 
 \item{a}{Assignments}
 
-\item{M}{List of cluster means}
+\item{m}{List of cluster means}
 }
 \value{
 Scalar.
