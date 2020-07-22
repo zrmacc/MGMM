@@ -1,0 +1,7 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{Missingness Aware Gaussian Mixture Models}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{Vignette.pdf}
+\end{document}

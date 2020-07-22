@@ -2,18 +2,18 @@
 % Please edit documentation in R/RcppExports.R
 \name{matOP}
 \alias{matOP}
-\title{Fast Outer Product}
+\title{Matrix Outer Product}
 \usage{
-matOP(X, Y)
+matOP(A, B)
 }
 \arguments{
-\item{X}{Numeric matrix.}
+\item{A}{Numeric matrix.}
 
-\item{Y}{Numeric matrix.}
+\item{B}{Numeric matrix.}
 }
 \value{
 Numeric matrix.
 }
 \description{
-Calculates the outer product \eqn{XY'}.
+Calculates the outer product \eqn{AB'}.
 }

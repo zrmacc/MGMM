@@ -1,12 +1,77 @@
----
-title: "README"
-author: "Zachary McCaw"
-date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    keep_md: TRUE
---- 
+## Missingness Aware Gaussian Mixture Models
 
-# Package Vignette
-```{r,child='vignettes/MGMM.Rmd'}
+This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
+
+* Maximum likelihood estimation of cluster means, covariances, and proportions.
+* Calculation of cluster membership probabilities and maximum a posteriori classification of the input vectors. 
+* ‘Completion’ of the input data, by imputing missing elements to their posterior means. 
+
+## Main Functions
+
+* `fit.GMM` estimates model parameters, performs classification and imputation.
+* `rGMM` simulates observations from a GMM, potentially with missingness. 
+* `ChooseK` provides guidance on choosing the number of clusters. 
+
+## Compact Example
+
+```{r}
+set.seed(101)
+require(MGMM)
+
+# Parameter settings.
+mean_list <- list(
+  c(1, 1),
+  c(-1, -1)
+)
+cov_list <- list(
+  matrix(c(1, -0.5, -0.5, 1), nrow = 2),
+  matrix(c(1, 0.5, 0.5, 1), nrow = 2)
+)
+
+# Generate data.
+data <- rGMM(
+  n = 1e3, 
+  d = 2, 
+  k = 2, 
+  miss = 0.1, 
+  means = mean_list, 
+  covs = cov_list
+)
+
+# ChooseK.
+choose_k <- ChooseK(
+  data,
+  k0 = 2,
+  k1 = 4,
+  boot = 10,
+  maxit = 10,
+  eps = 1e-4,
+  report = T
+)
+
+# Cluster number recommendations. 
+show(choose_k$Choices)
+
+# Estimation
+fit <- fit.GMM(
+  data,
+  k = 2,
+  maxit = 10
+)
+
+# Estimated means. 
+show(fit@Means)
+
+# Estimated covariances. 
+show(fit@Covariances)
+
+# Cluster assignments. 
+head(fit@Assignments)
+
+# Completed data. 
+head(fit@Completed)
 ```
+
+## Vignette
+
+Additional examples and details may be found [here](https://github.com/zrmacc/MGMM/tree/master/vignettes/Vignette.pdf).

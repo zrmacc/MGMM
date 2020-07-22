@@ -1,29 +1,23 @@
-// [[Rcpp::depends(RcppEigen)]]
-#include <RcppEigen.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
 
 //' Matrix Determinant
 //'
 //' Calculates the determinant of \eqn{A}.
 //'
 //' @param A Numeric matrix.
+//' @param logDet Return the logarithm of the determinant? 
 //' @return Scalar. 
 // [[Rcpp::export]]
-SEXP det(const Eigen::Map<Eigen::MatrixXd> A){
-  const double d = A.determinant();
+SEXP matDet(const arma::mat A, const bool logDet=false){
+  double d;
+  double s;
+  if(logDet){
+    arma::log_det(d, s, A);
+  } else {
+    d = arma::det(A);
+  }
   return Rcpp::wrap(d);
-}
-
-//' Matrix Inner Product
-//'
-//' Calculates the product \eqn{A'B}.
-//'
-//' @param A Numeric matrix.
-//' @param B Numeric matrix.
-//' @return Numeric matrix. 
-// [[Rcpp::export]]
-SEXP matIP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B){
-  const Eigen::MatrixXd AtB = (A.transpose() * B);
-  return Rcpp::wrap(AtB);
 }
 
 //' Matrix Inverse
@@ -33,9 +27,22 @@ SEXP matIP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd
 //' @param A Numeric matrix.
 //' @return Numeric matrix. 
 // [[Rcpp::export]]
-SEXP matInv(const Eigen::Map<Eigen::MatrixXd> A){
-  const Eigen::MatrixXd Ai = A.completeOrthogonalDecomposition().pseudoInverse();
+SEXP matInv(const arma::mat A){
+  const arma::mat Ai = arma::pinv(A);
   return Rcpp::wrap(Ai);
+}
+
+//' Matrix Inner Product
+//'
+//' Calculates the product \eqn{A'B}.
+//'
+//' @param A Numeric matrix.
+//' @param B Numeric matrix.
+//' @return Numeric matrix.
+// [[Rcpp::export]]
+SEXP matIP(const arma::mat A, const arma::mat B){
+  const arma::mat AtB = A.t() * B;
+  return Rcpp::wrap(AtB);
 }
 
 //' Matrix Matrix Product
@@ -44,24 +51,37 @@ SEXP matInv(const Eigen::Map<Eigen::MatrixXd> A){
 //'
 //' @param A Numeric matrix.
 //' @param B Numeric matrix.
-//' @return Numeric matrix. 
+//' @return Numeric matrix.
 // [[Rcpp::export]]
-SEXP MMP(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map<Eigen::MatrixXd> B){
-  const Eigen::MatrixXd C = A*B;
+SEXP MMP(const arma::mat A, const arma::mat B){
+  const arma::mat C = A * B;
   return Rcpp::wrap(C);
 }
 
-//' Fast Outer Product
+//' Matrix Outer Product
 //' 
-//' Calculates the outer product \eqn{XY'}.
+//' Calculates the outer product \eqn{AB'}.
 //' 
-//' @param X Numeric matrix.
-//' @param Y Numeric matrix.
+//' @param A Numeric matrix.
+//' @param B Numeric matrix.
 //' @return Numeric matrix.
 // [[Rcpp::export]]
-SEXP matOP(const Eigen::Map<Eigen::MatrixXd> X, const Eigen::Map<Eigen::MatrixXd> Y){
-  const Eigen::MatrixXd Q = X*Y.transpose();
-  return Rcpp::wrap(Q);
+SEXP matOP(const arma::mat A, const arma::mat B){
+  const arma::mat ABt = A * B.t();
+  return Rcpp::wrap(ABt);
+}
+
+//' Quadratic Form
+//' 
+//' Calculates the quadratic form \eqn{X'AX}.
+//' 
+//' @param X Numeric matrix.
+//' @param A Numeric matrix.
+//' @return Numeric matrix.
+// [[Rcpp::export]]
+SEXP matQF(const arma::mat X, const arma::mat A){
+  const arma::mat xAx = X.t() * A * X;
+  return Rcpp::wrap(xAx);
 }
 
 //' Schur complement
@@ -73,11 +93,10 @@ SEXP matOP(const Eigen::Map<Eigen::MatrixXd> X, const Eigen::Map<Eigen::MatrixXd
 //' @param Iba Cross information between target and nuisance parameters
 //' @return Numeric matrix. 
 // [[Rcpp::export]]
-SEXP SchurC(const Eigen::Map<Eigen::MatrixXd> Ibb, const Eigen::Map<Eigen::MatrixXd> Iaa,
-            const Eigen::Map<Eigen::MatrixXd> Iba){
-  // Kernel matrix
-  const Eigen::MatrixXd E = Ibb-(Iba*(Iaa.ldlt().solve(Iba.transpose())));
-  return Rcpp::wrap(E);
+SEXP SchurC(const arma::mat Ibb, const arma::mat Iaa,
+            const arma::mat Iba){
+  const arma::mat Ibba = Ibb - Iba * arma::solve(Iaa, Iba.t(), arma::solve_opts::likely_sympd);
+  return Rcpp::wrap(Ibba);
 }
 
 //' Matrix Trace
@@ -87,7 +106,7 @@ SEXP SchurC(const Eigen::Map<Eigen::MatrixXd> Ibb, const Eigen::Map<Eigen::Matri
 //' @param A Numeric matrix.
 //' @return Scalar.
 // [[Rcpp::export]]
-SEXP tr(const Eigen::Map<Eigen::MatrixXd> A){
-  const double t = A.diagonal().sum();
+SEXP tr(const arma::mat A){
+  const double t = arma::trace(A);
   return Rcpp::wrap(t);
 }
