@@ -381,18 +381,12 @@ fit.mix.miss.update <- function(
     old_pi
   )
   
-  # New cluster sizes
-  new_cluster_sizes <- MixClusterSizes(
-    split_data,
-    new_gamma
-  )
-  
   # Update cluster proportions.
-  new_pi <- new_cluster_sizes / sum(new_cluster_sizes)
+  new_pi <- old_cluster_sizes / sum(old_cluster_sizes)
   
   # New EM objective. 
   new_obj <- MixEMObj(
-    new_cluster_sizes,
+    old_cluster_sizes,
     new_pi,
     new_covs,
     new_resid_ops
@@ -433,46 +427,34 @@ MixClusterAssign <- function(
 ) {
   
   # Unpack.
-  n0 <- split_data$n0
-  n1 <- split_data$n1
   n2 <- split_data$n2
   d <- split_data$n_col 
   k <- theta$gamma$k
   
-  # Initial order.
-  init_order <- c()
-  if (n0 > 0) {
-    init_order <- c(init_order, split_data$idx_comp)
-  }
-  
-  if (n1 > 0) {
-    init_order <- c(init_order, split_data$idx_incomp)
-  }
-  
-  if (n2 > 0) {
-    init_order <- c(init_order, split_data$idx_empty)
-  }
-  
   # Responsibilities
   resp <- rbind(theta$gamma$gamma0, theta$gamma$gamma1)
   
-  # Density evaluations
+  # Density evaluations.
   dens <- rbind(theta$gamma$dens_eval0, theta$gamma$dens_eval1)
   
-  # Assignments
+  # Assignments.
   map_assign <- apply(resp, 1, which.max)
   if (n2 > 0) {
     map_assign <- c(map_assign, rep(NA, n2))
   }
   
+  # Recover initial order.
+  init_order <- split_data$init_order
   map_assign <- map_assign[order(init_order)]
   names(map_assign) <- split_data$orig_row_names
   
-  # Responsibilities
+  # Responsibilities.
   if (n2 > 0) {
     resp <- rbind(resp, array(NA, dim = c(n2, k)))
-    resp <- resp[order(init_order), ]
   }
+  
+  # Recover initial order.
+  resp <- resp[order(init_order), ]
   rownames(resp) <- NULL
   
   # Add entropies
@@ -482,11 +464,14 @@ MixClusterAssign <- function(
     .fun = function(x){-sum(x * log(x)) / log(k)}
   )
   
-  # Density evaluations
+  # Density evaluations.
   if (n2 > 0) {
     dens <- rbind(dens, array(NA, dim = c(n2, k)))
-    dens <- dens[order(init_order), ]
   }
+  
+  # Recover initial order.
+  dens <- dens[order(init_order), ]
+  rownames(dens) <- NULL
   
   # Assignment matrix.
   assign = cbind(
@@ -533,12 +518,10 @@ fit.mix.miss.impute <- function(
   
   # Output structure. 
   out <- matrix(NA, nrow = 0, ncol = d)
-  init_order <- c()
   
   ## Complete cases. 
   if (n0 > 0) {
     out <- rbind(out, split_data$data_comp)
-    init_order <- c(init_order, split_data$idx_comp)
   }
   
   ## Incomplete cases. 
@@ -555,7 +538,6 @@ fit.mix.miss.impute <- function(
     data_imp <- lapply(1:k, aux)
     data_imp <- Reduce("+", data_imp)
     out <- rbind(out, data_imp)
-    init_order <- c(init_order, split_data$idx_incomp)
   }
   
   ## Empty cases. 
@@ -567,10 +549,10 @@ fit.mix.miss.impute <- function(
     data_imp <- Reduce("+", data_imp)
     data_imp <- matrix(data = data_imp, nrow = n2, ncol = d, byrow = TRUE)
     out <- rbind(out, data_imp)
-    init_order <- c(init_order, split_data$idx_empty)
   }
   
   # Output
+  init_order <- split_data$init_order
   out <- out[order(init_order), ]
   rownames(out) <- split_data$orig_row_names
   colnames(out) <- split_data$orig_col_names

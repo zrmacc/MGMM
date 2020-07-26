@@ -57,10 +57,11 @@ fit.mvn.no_miss <- function(
 #' \itemize{
 #'   \item The original row and column names: `orig_row_names`, `orig_col_names`.
 #'   \item The original row and column numbers: `n_row` and `n_col`.
-#'   \item The complete cases `data_comp`, and their indices `idx_comp` in `data`.
-#'   \item The incomplete cases `data_incomp`, and their indices `idx_incomp` in `data`.
-#'   \item The empty cases `data_empty`, and their indices `idx_empty` in `data`.
-#'   \item Counts of complete `n0`, incomplete `n1`, and empty `n2` cases. 
+#'   \item The complete cases `data_comp`.
+#'   \item The incomplete cases `data_incomp`.
+#'   \item The empty cases `data_empty`.
+#'   \item Counts of complete `n0`, incomplete `n1`, and empty `n2` cases.
+#'   \item Initial order of the observations `init_order`. 
 #' }
 
 PartitionData <- function(data){
@@ -102,14 +103,10 @@ PartitionData <- function(data){
   out$n2 <- nrow(data_empty)
   
   out$data_comp <- data_comp
-  out$idx_comp <- idx_comp
-  
   out$data_incomp <- data_incomp
-  out$idx_incomp <- idx_incomp
-  
   out$data_empty <- data_empty
-  out$idx_empty <- idx_empty
   
+  out$init_order <- c(idx_comp, idx_incomp, idx_empty)
   return(out)
 }
 
@@ -362,13 +359,11 @@ fit.mvn.miss.impute <- function(
   
   d <- split_data$n_col 
   out <- matrix(NA, nrow = 0, ncol = d)
-  init_order <- c()
   
   # Complete data.
   n0 <- split_data$n0
   if(n0 > 0){
     out <- rbind(out, split_data$data_comp)
-    init_order <- c(init_order, split_data$idx_comp)
   }
   
   # Impute data.
@@ -376,7 +371,6 @@ fit.mvn.miss.impute <- function(
   if(n1 > 0){
     data_imp <- WorkResp(split_data$data_incomp, theta$mean, theta$cov)
     out <- rbind(out, data_imp)
-    init_order <- c(init_order, split_data$idx_incomp)
   }
   
   # Empty data.
@@ -384,10 +378,10 @@ fit.mvn.miss.impute <- function(
   if(n2 > 0){
     data_empty <- matrix(data = theta$mean, nrow = n2, ncol = d, byrow = TRUE)
     out <- rbind(out, data_empty)
-    init_order <- c(init_order, split_data$idx_empty)
   }
   
   # Restore initial order. 
+  init_order <- split_data$init_order
   out <- out[order(init_order), ]
   
   # Output

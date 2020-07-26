@@ -14,10 +14,11 @@ List containing:
 \itemize{
   \item The original row and column names: `orig_row_names`, `orig_col_names`.
   \item The original row and column numbers: `n_row` and `n_col`.
-  \item The complete cases `data_comp`, and their indices `idx_comp` in `data`.
-  \item The incomplete cases `data_incomp`, and their indices `idx_incomp` in `data`.
-  \item The empty cases `data_empty`, and their indices `idx_empty` in `data`.
-  \item Counts of complete `n0`, incomplete `n1`, and empty `n2` cases. 
+  \item The complete cases `data_comp`.
+  \item The incomplete cases `data_incomp`.
+  \item The empty cases `data_empty`.
+  \item Counts of complete `n0`, incomplete `n1`, and empty `n2` cases.
+  \item Initial order of the observations `init_order`. 
 }
 }
 \description{
