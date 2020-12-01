@@ -1,4 +1,5 @@
-# Purpose: Fitting function for fitting a single multivariate normal distribution in the presence of missingness.
+# Purpose: Fitting function for fitting a single multivariate normal
+# distribution in the presence of missingness. 
 # Updated: 20/07/18
 
 #-------------------------------------------------------------------------------

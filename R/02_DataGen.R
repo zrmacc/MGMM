@@ -34,7 +34,6 @@
 #' @seealso For estimation, see \code{\link{fit.GMM}}.
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(100)
 #' # Single component without missingness
 #' # Bivariate normal observations
@@ -65,7 +64,6 @@
 #' miss = 0.1, 
 #' means = mean_list, 
 #' covs = cov)
-#' }
 
 rGMM <- function(
   n, 

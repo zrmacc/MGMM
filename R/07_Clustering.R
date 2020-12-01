@@ -1,4 +1,4 @@
-# Purpose: Functions to evaluate clustering quality and choose k
+# Purpose: Functions to evaluate clustering quality and choose k. 
 # Updated: 20/07/20
 # Note: Quality metrics must accommodate the case of empty clusters.
 
@@ -19,7 +19,7 @@ ClustQual.partition_by_clust <- function(
   labs <- sort(unique(assign))
   k <- length(labs)
   aux <- function(j){
-    return(data[assign == labs[j], , drop = F])
+    return(data[assign == labs[j], , drop = FALSE])
   }
   out <- lapply(1:k, aux)
   return(out)
@@ -198,7 +198,6 @@ DavBou <- function(
 #' @seealso See \code{\link{ChooseK}} for using quality metrics to choose the cluster number.
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(100)
 #' # Data generation
 #' mean_list = list(
@@ -213,7 +212,6 @@ DavBou <- function(
 #' 
 #' # Clustering quality
 #' cluster_qual <- ClustQual(fit)
-#' }
 
 ClustQual <- function(fit) {
   
@@ -525,7 +523,7 @@ ChooseK.recommend <- function(
 #' for estimating the GMM with a specified cluster number.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' set.seed(100)
 #' mean_list <- list(c(2, 2), c(2, -2), c(-2, 2), c(-2, -2))
 #' data <- rGMM(n = 500, d = 2, k = 4, means = mean_list)
@@ -544,7 +542,7 @@ ChooseK <- function(
   init_props = NULL, 
   maxit = 10, 
   eps = 1e-4, 
-  report = T
+  report = TRUE
 ) {
   
   # Check inputs.

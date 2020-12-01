@@ -16,7 +16,7 @@ Responsibility.eval_dens_incomp(y, means, covs, pi)
 \item{pi}{Vector of cluster proportions.}
 }
 \value{
-Numeric density of observed elements
+Numeric density of observed elements.
 }
 \description{
 Evaluate the Density of an Incomplete Observations

@@ -1,4 +1,4 @@
-# Purpose: Define custom classes
+# Purpose: Define custom classes.
 # Updated: 20/07/16
 
 #' Mixture Model Class

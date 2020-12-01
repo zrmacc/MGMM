@@ -15,7 +15,7 @@ ChooseK(
   init_props = NULL,
   maxit = 10,
   eps = 1e-04,
-  report = T
+  report = TRUE
 )
 }
 \arguments{
@@ -56,7 +56,7 @@ cluster number \code{k_opt}, and the \code{k_1SE}, the smallest cluster number
  whose quality is within 1 SE of the optimum.
 }
 \examples{
-\dontrun{
+\donttest{
 set.seed(100)
 mean_list <- list(c(2, 2), c(2, -2), c(-2, 2), c(-2, -2))
 data <- rGMM(n = 500, d = 2, k = 4, means = mean_list)

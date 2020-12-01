@@ -1,4 +1,4 @@
-# Purpose: Fits a multivariate normal mixture in the presence of missingness
+# Purpose: Fits a multivariate normal mixture in the presence of missingness.
 # Updated: 19/07/18
 
 #------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# Purpose: Master estimation function for MGMM
+# Purpose: Master estimation function for MGMM.
 # Updated: 20/07/19
 
 #' Estimate Multivariate Normal Mixture
@@ -35,32 +35,32 @@
 #' the number of clusters.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Single component without missingness
 #' # Bivariate normal observations
-#' cov <- matrix(c(1, 0.5, 0.5, 1), nrow = 2)
-#' data <- rGMM(n = 1e3, d = 2, k = 1, means = c(2, 2), covs = cov)
+#' sigma <- matrix(c(1, 0.5, 0.5, 1), nrow = 2)
+#' data <- rGMM(n = 1e3, d = 2, k = 1, means = c(2, 2), covs = sigma)
 #' fit <- fit.GMM(data, k = 1)
 #' 
 #' # Single component with missingness
 #' # Trivariate normal observations
 #' mean_list <- list(c(-2, -2, -2), c(2, 2, 2))
-#' cov <- matrix(c(1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 1), nrow = 3)
-#' data <- rGMM(n = 1e3, d = 3, k = 2, means = mean_list, covs = cov)
+#' sigma <- matrix(c(1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 1), nrow = 3)
+#' data <- rGMM(n = 1e3, d = 3, k = 2, means = mean_list, covs = sigma)
 #' fit <- fit.GMM(data, k = 2)
 #' 
 #' # Two components without missingness
 #' # Trivariate normal observations
 #' mean_list <- list(c(-2, -2, -2), c(2, 2, 2))
-#' cov <- matrix(c(1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 1), nrow = 3)
-#' data <- rGMM(n = 1e3, d = 3, k = 2, means = mean_list, covs = cov)
+#' sigma <- matrix(c(1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 1), nrow = 3)
+#' data <- rGMM(n = 1e3, d = 3, k = 2, means = mean_list, covs = sigma)
 #' fit <- fit.GMM(data, k = 2)
 #' 
 #' # Four components with missingness
 #' # Bivariate normal observations
 #' # Note: Fitting is slow.
 #' mean_list <- list(c(2, 2), c(2, -2), c(-2, 2), c(-2, -2))
-#' cov <- 0.5 * diag(2)
+#' sigma <- 0.5 * diag(2)
 #' data <- rGMM(
 #' n = 1000, 
 #' d = 2, 
@@ -68,10 +68,10 @@
 #' pi = c(0.35, 0.15, 0.15, 0.35), 
 #' m = 0.1, 
 #' means = mean_list, 
-#' covs = cov)
+#' covs = sigma)
 #' fit <- fit.GMM(data, k = 4)
 #' }
-#'
+
 fit.GMM <- function(
   data, 
   k = 1, 

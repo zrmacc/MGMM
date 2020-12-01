@@ -41,7 +41,6 @@ using \code{M}, and the cluster covariance matrices are provided using
 setting that proportion of elements in the data matrix to \code{NA}.
 }
 \examples{
-\dontrun{
 set.seed(100)
 # Single component without missingness
 # Bivariate normal observations
@@ -72,7 +71,6 @@ pi = c(0.35, 0.15, 0.15, 0.35),
 miss = 0.1, 
 means = mean_list, 
 covs = cov)
-}
 }
 \seealso{
 For estimation, see \code{\link{fit.GMM}}.

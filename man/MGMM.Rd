@@ -7,7 +7,7 @@
 \description{
 Parameter estimation and classification via Gaussian Mixture Models, allowing
 for missingness in the input vectors. See \code{\link{fit.GMM}} for estimating
-the GMM, and \code{\link{ChooseK}} for selecting the number of cluseters. See 
+the GMM, and \code{\link{ChooseK}} for selecting the number of clusters. See 
 \code{\link{rGMM}} for simulating data from a GMM.
 }
 \author{

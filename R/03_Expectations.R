@@ -11,7 +11,7 @@
 #' @param means List of mean vectors.
 #' @param covs List of covariances matrices.
 #' @param pi Vector of cluster proportions.
-#' @return Numeric density of observed elements
+#' @return Numeric density of observed elements.
 
 Responsibility.eval_dens_incomp <- function(
   y, 
@@ -94,7 +94,8 @@ Responsibility <- function(
       .data = dens_eval0, 
       .margins = 1, 
       .fun = function(x) {x / sum(x)}, 
-      .drop = FALSE)
+      .drop = FALSE
+    )
     
     # Format
     colnames(dens_eval0) <- colnames(gamma0) <- paste0("k", seq(1:k))
@@ -119,7 +120,7 @@ Responsibility <- function(
       .data = dens_eval1, 
       .margins = 1, 
       .fun = function(x) {x / sum(x)}, 
-      .drop = F
+      .drop = FALSE
     )
     
     # Format

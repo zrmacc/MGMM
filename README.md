@@ -1,10 +1,15 @@
-## Missingness Aware Gaussian Mixture Models
+# Missingness Aware Gaussian Mixture Models
+
+Zachary McCaw <br>
+Updated: 2020-12-01
 
 This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
 
 * Maximum likelihood estimation of cluster means, covariances, and proportions.
 * Calculation of cluster membership probabilities and maximum a posteriori classification of the input vectors. 
-* ‘Completion’ of the input data, by imputing missing elements to their posterior means. 
+* Completion of the input data, by imputing missing elements to their posterior means. 
+
+The method is detailed in [MGMM: An R Package for fitting Gaussian Mixture Models on Incomplete Data](https://www.biorxiv.org/content/10.1101/2019.12.20.884551v2).
 
 ## Main Functions
 

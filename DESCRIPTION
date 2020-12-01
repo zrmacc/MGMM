@@ -1,13 +1,15 @@
 Package: MGMM
 Title: Missingness Aware Gaussian Mixture Models 
-Version: 0.3.0
+Date: 2020-08-24
+Version: 0.3.1
 Authors@R: 
     person(given = "Zachary",
            family = "McCaw",
            role = c("aut", "cre"),
            email = "zmccaw@alumni.harvard.edu",
-           comment = c(ORCID = "0000-0002-2006-9828"))
-Description: Parameter estimation and classification for Gaussian Mixture Models (GMMs) in the presence of missing data. This package uses the EM algorithm to obtain maximum likelihood estimates for all model parameters and maximum a posteriori classifications of the input vectors. 
+           comment = c(ORCID = "0000-0002-2006-9828")
+           )
+Description: Parameter estimation and classification for Gaussian Mixture Models (GMMs) in the presence of missing data. This package uses an expectation conditional maximization algorithm to obtain maximum likelihood estimates for all model parameters and maximum a posteriori classifications of the input vectors. For additional details, please see McCaw ZR, Julienne H, Aschard H. "MGMM: an R package for fitting Gaussian Mixture Models on Incomplete Data." <doi:10.1101/2019.12.20.884551>.
 Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
@@ -22,7 +24,8 @@ Imports:
 	plyr,
 	Rcpp (>= 1.0.3),
 	stats
-Suggests: knitr,
+Suggests: 
+	knitr,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
