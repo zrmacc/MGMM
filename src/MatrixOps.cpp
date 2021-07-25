@@ -8,6 +8,7 @@
 //' @param A Numeric matrix.
 //' @param logDet Return the logarithm of the determinant? 
 //' @return Scalar. 
+//' @noRd
 // [[Rcpp::export]]
 SEXP matDet(const arma::mat A, const bool logDet=false){
   double d;
@@ -26,6 +27,7 @@ SEXP matDet(const arma::mat A, const bool logDet=false){
 //'
 //' @param A Numeric matrix.
 //' @return Numeric matrix. 
+//' @noRd
 // [[Rcpp::export]]
 SEXP matInv(const arma::mat A){
   const arma::mat Ai = arma::pinv(A);
@@ -39,6 +41,7 @@ SEXP matInv(const arma::mat A){
 //' @param A Numeric matrix.
 //' @param B Numeric matrix.
 //' @return Numeric matrix.
+//' @noRd
 // [[Rcpp::export]]
 SEXP matIP(const arma::mat A, const arma::mat B){
   const arma::mat AtB = A.t() * B;
@@ -52,6 +55,7 @@ SEXP matIP(const arma::mat A, const arma::mat B){
 //' @param A Numeric matrix.
 //' @param B Numeric matrix.
 //' @return Numeric matrix.
+//' @noRd
 // [[Rcpp::export]]
 SEXP MMP(const arma::mat A, const arma::mat B){
   const arma::mat C = A * B;
@@ -65,6 +69,7 @@ SEXP MMP(const arma::mat A, const arma::mat B){
 //' @param A Numeric matrix.
 //' @param B Numeric matrix.
 //' @return Numeric matrix.
+//' @noRd
 // [[Rcpp::export]]
 SEXP matOP(const arma::mat A, const arma::mat B){
   const arma::mat ABt = A * B.t();
@@ -78,6 +83,7 @@ SEXP matOP(const arma::mat A, const arma::mat B){
 //' @param X Numeric matrix.
 //' @param A Numeric matrix.
 //' @return Numeric matrix.
+//' @noRd
 // [[Rcpp::export]]
 SEXP matQF(const arma::mat X, const arma::mat A){
   const arma::mat xAx = X.t() * A * X;
@@ -92,6 +98,7 @@ SEXP matQF(const arma::mat X, const arma::mat A){
 //' @param Iaa Information of nuisance parameter
 //' @param Iba Cross information between target and nuisance parameters
 //' @return Numeric matrix. 
+//' @noRd
 // [[Rcpp::export]]
 SEXP SchurC(const arma::mat Ibb, const arma::mat Iaa,
             const arma::mat Iba){
@@ -105,6 +112,7 @@ SEXP SchurC(const arma::mat Ibb, const arma::mat Iaa,
 //'
 //' @param A Numeric matrix.
 //' @return Scalar.
+//' @noRd
 // [[Rcpp::export]]
 SEXP tr(const arma::mat A){
   const double t = arma::trace(A);

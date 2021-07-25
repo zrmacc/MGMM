@@ -9,6 +9,7 @@
 //' @param B NxQ matrix.
 //' @param corMat Return correlation matrix? If false, returns a covariance matrix.
 //' @return Numeric matrix. 
+//' @noRd
 // [[Rcpp::export]]
 
 SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
@@ -48,7 +49,7 @@ SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
     Zb = arma::normalise(Zb);
   }
   
-  // Inner product
+  // Inner product.
   if(corMat){
     R = Za.t() * Zb;
   } else {
@@ -66,6 +67,7 @@ SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
 //' 
 //' @param A symmetric matrix. 
 //' @return Numeric vector.
+//' @noRd
 // [[Rcpp::export]]
 
 SEXP eigSym(const arma::mat A) {
@@ -73,6 +75,6 @@ SEXP eigSym(const arma::mat A) {
   arma::vec e;
   e = arma::eig_sym(A);
   
-  // Output
+  // Output.
   return Rcpp::wrap(e);
 } 

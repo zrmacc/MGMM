@@ -9,6 +9,7 @@
 #' @param B NxQ matrix.
 #' @param corMat Return correlation matrix? If false, returns a covariance matrix.
 #' @return Numeric matrix. 
+#' @noRd
 matCov <- function(A, B, corMat = FALSE) {
     .Call(`_MGMM_matCov`, A, B, corMat)
 }
@@ -19,6 +20,7 @@ matCov <- function(A, B, corMat = FALSE) {
 #' 
 #' @param A symmetric matrix. 
 #' @return Numeric vector.
+#' @noRd
 eigSym <- function(A) {
     .Call(`_MGMM_eigSym`, A)
 }
@@ -30,6 +32,7 @@ eigSym <- function(A) {
 #' @param A Numeric matrix.
 #' @param logDet Return the logarithm of the determinant? 
 #' @return Scalar. 
+#' @noRd
 matDet <- function(A, logDet = FALSE) {
     .Call(`_MGMM_matDet`, A, logDet)
 }
@@ -40,6 +43,7 @@ matDet <- function(A, logDet = FALSE) {
 #'
 #' @param A Numeric matrix.
 #' @return Numeric matrix. 
+#' @noRd
 matInv <- function(A) {
     .Call(`_MGMM_matInv`, A)
 }
@@ -51,6 +55,7 @@ matInv <- function(A) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix.
+#' @noRd
 matIP <- function(A, B) {
     .Call(`_MGMM_matIP`, A, B)
 }
@@ -62,6 +67,7 @@ matIP <- function(A, B) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix.
+#' @noRd
 MMP <- function(A, B) {
     .Call(`_MGMM_MMP`, A, B)
 }
@@ -73,6 +79,7 @@ MMP <- function(A, B) {
 #' @param A Numeric matrix.
 #' @param B Numeric matrix.
 #' @return Numeric matrix.
+#' @noRd
 matOP <- function(A, B) {
     .Call(`_MGMM_matOP`, A, B)
 }
@@ -84,6 +91,7 @@ matOP <- function(A, B) {
 #' @param X Numeric matrix.
 #' @param A Numeric matrix.
 #' @return Numeric matrix.
+#' @noRd
 matQF <- function(X, A) {
     .Call(`_MGMM_matQF`, X, A)
 }
@@ -96,6 +104,7 @@ matQF <- function(X, A) {
 #' @param Iaa Information of nuisance parameter
 #' @param Iba Cross information between target and nuisance parameters
 #' @return Numeric matrix. 
+#' @noRd
 SchurC <- function(Ibb, Iaa, Iba) {
     .Call(`_MGMM_SchurC`, Ibb, Iaa, Iba)
 }
@@ -106,6 +115,7 @@ SchurC <- function(Ibb, Iaa, Iba) {
 #'
 #' @param A Numeric matrix.
 #' @return Scalar.
+#' @noRd
 tr <- function(A) {
     .Call(`_MGMM_tr`, A)
 }

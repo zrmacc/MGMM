@@ -1,7 +1,7 @@
 # Missingness Aware Gaussian Mixture Models
 
 Zachary McCaw <br>
-Updated: 2020-12-01
+Updated: 2021-07-25
 
 This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
 
@@ -13,7 +13,7 @@ The method is detailed in [MGMM: An R Package for fitting Gaussian Mixture Model
 
 ## Main Functions
 
-* `fit.GMM` estimates model parameters, performs classification and imputation.
+* `FitGMM` estimates model parameters, performs classification and imputation.
 * `rGMM` simulates observations from a GMM, potentially with missingness. 
 * `ChooseK` provides guidance on choosing the number of clusters. 
 
@@ -22,7 +22,7 @@ The method is detailed in [MGMM: An R Package for fitting Gaussian Mixture Model
 
 ```r
 set.seed(101)
-require(MGMM)
+library(MGMM)
 
 # Parameter settings.
 mean_list <- list(
@@ -44,7 +44,22 @@ data <- rGMM(
   covs = cov_list
 )
 
-# ChooseK.
+# Original data.
+head(data)
+```
+
+```
+##           y1          y2
+## 1  1.6512855  2.60621938
+## 2 -0.5721069          NA
+## 2 -2.0045376 -2.31888263
+## 2 -0.6229388 -1.51543968
+## 1  2.0258413  0.06921658
+## 2 -1.3476380 -1.51915826
+```
+
+```r
+# Choose cluster number.
 choose_k <- ChooseK(
   data,
   k0 = 2,
@@ -52,7 +67,7 @@ choose_k <- ChooseK(
   boot = 10,
   maxit = 10,
   eps = 1e-4,
-  report = T
+  report = TRUE
 )
 ```
 
@@ -69,15 +84,15 @@ show(choose_k$Choices)
 
 ```
 ##   Metric k_opt   Metric_opt k_1se   Metric_1se
-## 1    BIC     4 2285.4269195     4 2285.4269195
+## 1    BIC     4 2285.4269195     2 2340.4441587
 ## 2    CHI     4    4.5081110     4    4.5081110
 ## 3    DBI     2    0.7818011     2    0.7818011
 ## 4    SIL     2    0.4785951     2    0.4785951
 ```
 
 ```r
-# Estimation
-fit <- fit.GMM(
+# Estimation.
+fit <- FitGMM(
   data,
   k = 2,
   maxit = 10

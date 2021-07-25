@@ -1,7 +1,7 @@
 Package: MGMM
 Title: Missingness Aware Gaussian Mixture Models 
-Date: 2020-08-24
-Version: 0.3.1
+Date: 2021-07-25
+Version: 0.4.0
 Authors@R: 
     person(given = "Zachary",
            family = "McCaw",
@@ -9,11 +9,10 @@ Authors@R:
            email = "zmccaw@alumni.harvard.edu",
            comment = c(ORCID = "0000-0002-2006-9828")
            )
-Description: Parameter estimation and classification for Gaussian Mixture Models (GMMs) in the presence of missing data. This package uses an expectation conditional maximization algorithm to obtain maximum likelihood estimates for all model parameters and maximum a posteriori classifications of the input vectors. For additional details, please see McCaw ZR, Julienne H, Aschard H. "MGMM: an R package for fitting Gaussian Mixture Models on Incomplete Data." <doi:10.1101/2019.12.20.884551>.
+Description: Parameter estimation and classification for Gaussian Mixture Models (GMMs) in the presence of missing data. This package complements existing implementations by allowing for both missing elements in the input vectors and full (as opposed to strictly diagonal) covariance matrices. Estimating is performed using an expectation conditional maximization algorithm that accounts for missingness of both the cluster assignments and the vector components. The output includes the marginal cluster membership probabilities; the mean and covariance of each cluster; the posterior probabilities of cluster membership; and a completed version of the input data, with missing values imputed to their posterior expectations. For additional details, please see McCaw ZR, Julienne H, Aschard H. "MGMM: an R package for fitting Gaussian Mixture Models on Incomplete Data." <doi:10.1101/2019.12.20.884551>.
 Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 LinkingTo:
 	Rcpp,
 	RcppArmadillo
@@ -25,7 +24,10 @@ Imports:
 	Rcpp (>= 1.0.3),
 	stats
 Suggests: 
-	knitr,
-    rmarkdown
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    withr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
+Config/testthat/edition: 3

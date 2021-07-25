@@ -5,27 +5,28 @@
 \alias{mix-class}
 \title{Mixture Model Class}
 \description{
-Defines the class returned by the fitting functions.
+Defines a class to hold Gaussian Mixture Models.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{Assignments}}{Maximum a posteriori assignment.}
+\item{\code{Assignments}}{Maximum a posteriori assignments.}
 
-\item{\code{Completed}}{Completed data, with missing values replaced by posterior expectations.}
+\item{\code{Completed}}{Completed data, with missing values imputed to their
+posterior expectations.}
 
-\item{\code{Components}}{Components.}
+\item{\code{Components}}{Number of components.}
 
-\item{\code{Covariances}}{Fitted cluster covariances.}
+\item{\code{Covariances}}{List of fitted cluster covariance matrices.}
 
-\item{\code{Density}}{Component density at observation.}
+\item{\code{Density}}{Density of each component at each example.}
 
-\item{\code{Means}}{Fitted cluster means.}
+\item{\code{Means}}{List of fitted cluster means.}
 
 \item{\code{Objective}}{Final value of the EM objective.}
 
 \item{\code{Proportions}}{Fitted cluster proportions.}
 
-\item{\code{Responsibilities}}{Posterior membership probabilities.}
+\item{\code{Responsibilities}}{Posterior membership probabilities for each example.}
 }}
 
