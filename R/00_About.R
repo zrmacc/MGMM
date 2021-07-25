@@ -10,7 +10,7 @@ NULL
 #' Parameter estimation and classification for Gaussian Mixture Models (GMMs) in
 #' the presence of missing data. This package complements existing
 #' implementations by allowing for both missing elements in the input vectors
-#' and full (as opposed to strictly diagonal) covariance matrices. Estimating is
+#' and full (as opposed to strictly diagonal) covariance matrices. Estimation is
 #' performed using an expectation conditional maximization algorithm that
 #' accounts for missingness of both the cluster assignments and the vector
 #' components. The output includes the marginal cluster membership
