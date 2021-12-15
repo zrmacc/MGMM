@@ -1,7 +1,7 @@
 # Missingness Aware Gaussian Mixture Models
 
 Zachary McCaw <br>
-Updated: 2021-07-25
+Updated: 2021-12-14
 
 This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
 
@@ -16,6 +16,7 @@ The method is detailed in [MGMM: An R Package for fitting Gaussian Mixture Model
 * `FitGMM` estimates model parameters, performs classification and imputation.
 * `rGMM` simulates observations from a GMM, potentially with missingness. 
 * `ChooseK` provides guidance on choosing the number of clusters. 
+* `GenImputation` performs stochastic imputation for multiple imputation-based inference.
 
 ## Compact Example
 
@@ -161,7 +162,7 @@ head(fit@Assignments)
 ```
 
 ```r
-# Completed data. 
+# Deterministic imputation.
 head(fit@Completed)
 ```
 
@@ -169,6 +170,22 @@ head(fit@Completed)
 ##           y1          y2
 ## 1  1.6512855  2.60621938
 ## 2 -0.5721069 -0.14379539
+## 2 -2.0045376 -2.31888263
+## 2 -0.6229388 -1.51543968
+## 1  2.0258413  0.06921658
+## 2 -1.3476380 -1.51915826
+```
+
+```r
+# Stochastic imputation.
+imp <- GenImputation(fit)
+head(imp)
+```
+
+```
+##           y1          y2
+## 1  1.6512855  2.60621938
+## 2 -0.5721069  0.88613853
 ## 2 -2.0045376 -2.31888263
 ## 2 -0.6229388 -1.51543968
 ## 1  2.0258413  0.06921658
