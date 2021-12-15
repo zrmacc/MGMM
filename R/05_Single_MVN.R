@@ -43,11 +43,12 @@ FitMVNComplete <- function(
   
   # Output.
   out <- methods::new(
-    "mvn",
-    "Completed" = data,
-    "Covariance" = new_cov,
-    "Mean" = new_mean,
-    "Objective" = objective
+    Class = "mvn",
+    Completed = data,
+    Covariance = new_cov,
+    Data = data,
+    Mean = new_mean,
+    Objective = objective
   )
   return(out)
 }
@@ -308,20 +309,20 @@ MVNMissImpute <- function(
   
   # Complete data.
   n0 <- split_data$n0
-  if(n0 > 0){
+  if (n0 > 0) {
     out <- rbind(out, split_data$data_comp)
   }
   
   # Impute data.
   n1 <- split_data$n1
-  if(n1 > 0){
+  if (n1 > 0) {
     data_imp <- WorkResp(split_data$data_incomp, theta$mean, theta$cov)
     out <- rbind(out, data_imp)
   }
   
   # Empty data.
   n2 <- split_data$n2
-  if(n2 > 0){
+  if (n2 > 0) {
     data_empty <- matrix(data = theta$mean, nrow = n2, ncol = d, byrow = TRUE)
     out <- rbind(out, data_empty)
   }
@@ -339,7 +340,7 @@ MVNMissImpute <- function(
 
 #-------------------------------------------------------------------------------
 
-#' Estimation for aMultivariate Normal Distribution with Missingness
+#' Estimation for a Multivariate Normal Distribution with Missingness
 #'
 #' @param data Numeric data matrix.
 #' @param init_mean Optional initial mean vector.
@@ -372,7 +373,7 @@ FitMVNMiss <- function(
   )
   
   # Maximization
-  Update <- function(theta){MVNMissUpdate(split_data, theta, fix_mean)}
+  Update <- function(theta) {MVNMissUpdate(split_data, theta, fix_mean)}
   theta1 <- Maximization(theta0, Update, maxit, eps, report)
   
   # Imputation.
@@ -380,11 +381,12 @@ FitMVNMiss <- function(
   
   # Output.
   out <- methods::new(
-    "mvn",
-    "Completed" = imputed,
-    "Covariance" = theta1$cov,
-    "Mean" = theta1$mean,
-    "Objective" = theta1$new_obj
+    Class = "mvn",
+    Completed = imputed,
+    Covariance = theta1$cov,
+    Data = data,
+    Mean = theta1$mean,
+    Objective = theta1$new_obj
   )
   return(out)
 }

@@ -19,6 +19,8 @@ posterior expectations.}
 
 \item{\code{Covariances}}{List of fitted cluster covariance matrices.}
 
+\item{\code{Data}}{Original data, with missing values present.}
+
 \item{\code{Density}}{Density of each component at each example.}
 
 \item{\code{Means}}{List of fitted cluster means.}

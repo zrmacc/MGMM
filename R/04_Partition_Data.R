@@ -1,7 +1,11 @@
 # Purpose: Partition data by missingness pattern.
-# Updated: 2021-07-24
+# Updated: 2021-12-09
 
-#' Partition Data by Missingness. 
+
+#' Partition Data by Missingness Pattern
+#' 
+#' Returns a list with the input data split in separate matrices for complete
+#' cases, incomplete cases, and empty cases.
 #' 
 #' @param data Data.frame.
 #' @return List containing:
@@ -14,8 +18,9 @@
 #'   \item Counts of complete `n0`, incomplete `n1`, and empty `n2` cases.
 #'   \item Initial order of the observations `init_order`. 
 #' }
+#' @export
 
-PartitionData <- function(data){
+PartitionData <- function(data) {
   
   d <- ncol(data)
   idx <- seq(1:nrow(data))
@@ -38,7 +43,7 @@ PartitionData <- function(data){
   idx_empty <- idx_incomp[is_empty]
   
   # Remove empty cases
-  data_incomp <- data_incomp[!is_empty, ]
+  data_incomp <- data_incomp[!is_empty, , drop = FALSE]
   idx_incomp <- idx_incomp[!is_empty]
   
   # Output
@@ -57,6 +62,38 @@ PartitionData <- function(data){
   out$data_incomp <- data_incomp
   out$data_empty <- data_empty
   
+  out$idx_comp <- idx_comp
+  out$idx_incomp <- idx_incomp
+  out$idx_empty <- idx_empty
   out$init_order <- c(idx_comp, idx_incomp, idx_empty)
   return(out)
 }
+
+
+#' Reconstitute Data
+#' 
+#' Reassembles a data matrix split by missingness pattern.
+#' 
+#' @param split_data Split data are returned by \code{\link{PartitionData}}.
+#' @return Numeric matrix.
+#' @export
+
+ReconstituteData <- function(split_data) {
+  
+  d <- split_data$n_col 
+  out <- rbind(
+    split_data$data_comp,
+    split_data$data_incomp,
+    split_data$data_empty
+  )
+  
+  # Restore initial order. 
+  init_order <- split_data$init_order
+  out <- out[order(init_order), ]
+  
+  # Output
+  rownames(out) <- split_data$orig_row_names
+  colnames(out) <- split_data$orig_col_names  
+
+  return(out)  
+} 

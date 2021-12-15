@@ -2,7 +2,7 @@
 % Please edit documentation in R/04_Partition_Data.R
 \name{PartitionData}
 \alias{PartitionData}
-\title{Partition Data by Missingness.}
+\title{Partition Data by Missingness Pattern}
 \usage{
 PartitionData(data)
 }
@@ -22,5 +22,6 @@ List containing:
 }
 }
 \description{
-Partition Data by Missingness.
+Returns a list with the input data split in separate matrices for complete
+cases, incomplete cases, and empty cases.
 }

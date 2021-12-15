@@ -15,6 +15,8 @@ posterior expectations.}
 
 \item{\code{Covariance}}{Fitted covariance matrix.}
 
+\item{\code{Data}}{Original data, with missing values present.}
+
 \item{\code{Mean}}{Fitted mean vector.}
 
 \item{\code{Objective}}{Final value of the EM objective.}

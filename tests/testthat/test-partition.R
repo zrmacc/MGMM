@@ -21,3 +21,28 @@ test_that("Partition data.", {
   expect_equal(part_data$init_order, c(4, 2, 3, 1))
   
 })
+
+test_that("Reconstitute data.", {
+  
+  data <- rbind(c(0, 0), c(1, 1), c(2, 2))
+  
+  # Case of no missing data.
+  split_data <- PartitionData(data)
+  recov_data <- ReconstituteData(split_data)
+  expect_equal(data, recov_data)
+  
+  # Case of incomplete data.
+  data[2, 2] <- NA
+  split_data <- PartitionData(data)
+  recov_data <- ReconstituteData(split_data)
+  expect_equal(data, recov_data)
+  
+  # Case of incomplete data and empty data.
+  data[2, 2] <- NA
+  data[3, 1] <- NA
+  data[3, 2] <- NA
+  split_data <- PartitionData(data)
+  recov_data <- ReconstituteData(split_data)
+  expect_equal(data, recov_data)
+  
+})

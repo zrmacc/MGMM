@@ -10,6 +10,7 @@
 #' @slot Completed Completed data, with missing values imputed to their
 #'   posterior expectations.
 #' @slot Covariance Fitted covariance matrix.
+#' @slot Data Original data, with missing values present.
 #' @slot Mean Fitted mean vector.
 #' @slot Objective Final value of the EM objective.
 #' @name mvn-class
@@ -20,7 +21,8 @@ methods::setClass(
   Class = "mvn", 
   representation = representation(
     Completed = "matrix",
-    Covariance = "matrix", 
+    Covariance = "matrix",
+    Data = "matrix",
     Mean = "vector", 
     Objective = "numeric"
   )
@@ -113,6 +115,7 @@ methods::setMethod(
 #'   posterior expectations.
 #' @slot Components Number of components.
 #' @slot Covariances List of fitted cluster covariance matrices.
+#' @slot Data Original data, with missing values present.
 #' @slot Density Density of each component at each example.
 #' @slot Means List of fitted cluster means.
 #' @slot Objective Final value of the EM objective.
@@ -128,7 +131,8 @@ methods::setClass(
     Assignments = "matrix", 
     Completed = "matrix",
     Components = "numeric", 
-    Covariances = "list", 
+    Covariances = "list",
+    Data = "matrix",
     Density = "matrix", 
     Means = "list", 
     Objective = "numeric",

@@ -618,6 +618,7 @@ FitMix <- function(
     Completed = imputed,
     Components = k, 
     Covariances = theta1$covs, 
+    Data = data,
     Density = assign$Density, 
     Means = theta1$means, 
     Objective = theta1$new_obj,
