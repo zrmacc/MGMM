@@ -15,3 +15,18 @@ Numeric matrix with missing values imputed.
 \description{
 Generates a stochastic imputation of a data set from a fitted data set.
 }
+\examples{
+set.seed(100)
+
+# Generate data and introduce missingness.
+data <- rGMM(n = 25, d = 2, k = 1)
+data[1, 1] <- NA
+data[2, 2] <- NA
+data[3, ] <- NA 
+
+# Fit GMM.
+fit <- FitGMM(data)
+
+# Generate imputation.
+imputed <- GenImputation(fit)
+}

@@ -10,6 +10,7 @@
 #' @param split_data Split
 #' @param fit Fitted model.
 #' @return Numeric matrix.
+#' @importFrom methods is
 #' @noRd
 
 ImputeEmpty <- function(split_data, fit) {
@@ -92,6 +93,7 @@ CalcCondDist <- function(y, idx_a, idx_b, mu, sigma) {
 #' @param split_data Split
 #' @param fit Fitted model.
 #' @return Numeric matrix.
+#' @importFrom methods is
 #' @noRd
 
 ImputeIncomplete <- function(split_data, fit) {
@@ -155,6 +157,20 @@ ImputeIncomplete <- function(split_data, fit) {
 #' @param fit Fitted model.
 #' @return Numeric matrix with missing values imputed.
 #' @export 
+#' @examples
+#' set.seed(100)
+#' 
+#' # Generate data and introduce missingness.
+#' data <- rGMM(n = 25, d = 2, k = 1)
+#' data[1, 1] <- NA
+#' data[2, 2] <- NA
+#' data[3, ] <- NA 
+#' 
+#' # Fit GMM.
+#' fit <- FitGMM(data)
+#' 
+#' # Generate imputation.
+#' imputed <- GenImputation(fit)
 
 GenImputation <- function(fit) {
   
@@ -189,6 +205,32 @@ GenImputation <- function(fit) {
 #' @return List containing the final point estimate (`point`) and 
 #'   sampling covariance (`cov`).
 #' @export
+#' @examples 
+#' set.seed(100)
+#' 
+#' # Generate data and introduce missingness.
+#' data <- rGMM(n = 25, d = 2, k = 1)
+#' data[1, 1] <- NA
+#' data[2, 2] <- NA
+#' data[3, ] <- NA 
+#' 
+#' # Fit GMM.
+#' fit <- FitGMM(data)
+#' 
+#' # Lists to store summary statistics.
+#' points <- list()
+#' covs <- list()
+#' 
+#' # Perform 50 multiple imputations.
+#' # For each, calculate the marginal mean and its sampling variance.
+#' for (i in seq_len(50)) {
+#'   imputed <- GenImputation(fit)
+#'   points[[i]] <- apply(imputed, 2, mean)
+#'   covs[[i]] <- cov(imputed) / nrow(imputed)
+#' }
+#' 
+#' # Combine summary statistics across imputations.
+#' results <- CombineMIs(points, covs)
 
 CombineMIs <- function(points, covs) {
   m <- length(points)

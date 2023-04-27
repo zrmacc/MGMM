@@ -18,3 +18,30 @@ List containing the final point estimate (`point`) and
 \description{
 Combines point estimates and standard errors across multiple imputations.
 }
+\examples{
+set.seed(100)
+
+# Generate data and introduce missingness.
+data <- rGMM(n = 25, d = 2, k = 1)
+data[1, 1] <- NA
+data[2, 2] <- NA
+data[3, ] <- NA 
+
+# Fit GMM.
+fit <- FitGMM(data)
+
+# Lists to store summary statistics.
+points <- list()
+covs <- list()
+
+# Perform 50 multiple imputations.
+# For each, calculate the marginal mean and its sampling variance.
+for (i in seq_len(50)) {
+  imputed <- GenImputation(fit)
+  points[[i]] <- apply(imputed, 2, mean)
+  covs[[i]] <- cov(imputed) / nrow(imputed)
+}
+
+# Combine summary statistics across imputations.
+results <- CombineMIs(points, covs)
+}

@@ -7,9 +7,9 @@ This package performs estimation and inference for Gaussian Mixture Models (GMMs
 
 * Maximum likelihood estimation of cluster means, covariances, and proportions.
 * Calculation of cluster membership probabilities and maximum a posteriori classification of the input vectors. 
-* Completion of the input data, by imputing missing elements to their posterior means. 
+* Deterministic completion of the input data, by imputing missing elements to their posterior means, and stochastic completion of the input data, by drawing missing elements from the fitted GMM.
 
-The method is detailed in [MGMM: An R Package for fitting Gaussian Mixture Models on Incomplete Data](https://www.biorxiv.org/content/10.1101/2019.12.20.884551v2).
+The method is detailed in [Fitting Gaussian mixture models on incomplete data](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9158227/).
 
 ## Main Functions
 

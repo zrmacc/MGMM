@@ -89,7 +89,7 @@ ReconstituteData <- function(split_data) {
   
   # Restore initial order. 
   init_order <- split_data$init_order
-  out <- out[order(init_order), ]
+  out <- out[order(init_order), , drop = FALSE]
   
   # Output
   rownames(out) <- split_data$orig_row_names

@@ -553,7 +553,7 @@ MixImpute <- function(
   
   # Output.
   init_order <- split_data$init_order
-  out <- out[order(init_order), ]
+  out <- out[order(init_order), , drop = FALSE]
   rownames(out) <- split_data$orig_row_names
   colnames(out) <- split_data$orig_col_names
   return(out)
