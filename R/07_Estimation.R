@@ -20,6 +20,8 @@
 #' @param fix_means Fix the means to their starting value? Must provide initial
 #'   values.
 #' @param init_covs Optional list of initial covariance matrices.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
@@ -82,6 +84,7 @@ FitGMM <- function(
   init_means = NULL, 
   fix_means = FALSE, 
   init_covs = NULL, 
+  lambda = 0,
   init_props = NULL, 
   maxit = 100, 
   eps = 1e-6, 
@@ -159,27 +162,29 @@ FitGMM <- function(
   ## Case 1: Single mixture component.
   if (k == 1) {
     out <- FitMVN(
-      data,
-      init_means[[1]],
-      fix_means,
-      init_covs[[1]],
-      maxit, 
-      eps,
-      report
+      data = data,
+      init_mean = init_means[[1]],
+      fix_mean = fix_means,
+      init_cov = init_covs[[1]],
+      lambda = lambda,
+      maxit = maxit, 
+      eps = eps,
+      report = report
     )
 
   ## Case 2: Multiple mixture components. 
   } else {
     out <- FitMix(
-      data,
-      k,
-      init_means,
-      fix_means,
-      init_covs,
-      init_props,
-      maxit,
-      eps,
-      report
+      data = data,
+      k = k,
+      init_means = init_means,
+      fix_means = fix_means,
+      init_covs = init_covs,
+      lambda = lambda,
+      init_props = init_props,
+      maxit = maxit,
+      eps = eps,
+      report = report
     )
 
   }

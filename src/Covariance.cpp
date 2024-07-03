@@ -8,11 +8,17 @@
 //' @param A NxP matrix.
 //' @param B NxQ matrix.
 //' @param corMat Return correlation matrix? If false, returns a covariance matrix.
+//' @param eps Optional ridge parameter added to the diagonal of the covariance matrix.
 //' @return Numeric matrix. 
 //' @noRd
 // [[Rcpp::export]]
 
-SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
+SEXP matCov(
+    const arma::mat A, 
+    const arma::mat B, 
+    const bool corMat=false,
+    const double eps=0.0
+){
   
   // Dimensions.
   const int n = A.n_rows;
@@ -22,16 +28,14 @@ SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
   // Initialize.
   const arma::colvec u = arma::ones(n);
   arma::mat Za = arma::zeros(n, p);
-  arma::rowvec ma = arma::zeros(1, p);
   arma::mat Ma = arma::zeros(n, p);
   arma::mat Zb = arma::zeros(n, q);
-  arma::rowvec mb = arma::zeros(1, q);
   arma::mat Mb = arma::zeros(n, q);
   arma::mat R = arma::zeros(p, q);
   
   // Column-wise means.
-  ma = arma::mean(A, 0);
-  mb = arma::mean(B, 0);
+  arma::rowvec ma = arma::mean(A, 0);
+  arma::rowvec mb = arma::mean(B, 0);
   
   // Generate centering matrices.
   for(int i=0; i<n; i++){
@@ -47,13 +51,13 @@ SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat=false){
   if(corMat){
     Za = arma::normalise(Za);
     Zb = arma::normalise(Zb);
-  }
+  } 
   
-  // Inner product.
-  if(corMat){
-    R = Za.t() * Zb;
-  } else {
-    R = (Za.t() * Zb) / (n-1);
+  // Calculate covariance.
+  R = Za.t() * Zb;
+  if (not corMat) {
+    R += eps * arma::eye(p, q);
+    R /= (n-1);
   }
   
   // Output

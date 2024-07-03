@@ -10,12 +10,11 @@
 #' @param split_data Split
 #' @param fit Fitted model.
 #' @return Numeric matrix.
-#' @importFrom methods is
 #' @noRd
 
 ImputeEmpty <- function(split_data, fit) {
   if (split_data$n2 > 0) {
-    if (is(fit, "mvn")) {
+    if (methods::is(fit, "mvn")) {
       out <- rGMM(
         n = split_data$n2,
         d = split_data$n_col,
@@ -93,7 +92,6 @@ CalcCondDist <- function(y, idx_a, idx_b, mu, sigma) {
 #' @param split_data Split
 #' @param fit Fitted model.
 #' @return Numeric matrix.
-#' @importFrom methods is
 #' @noRd
 
 ImputeIncomplete <- function(split_data, fit) {
@@ -102,7 +100,7 @@ ImputeIncomplete <- function(split_data, fit) {
     data_incomp <- split_data$data_incomp
     idx <- seq_len(nrow(data_incomp))
     
-    if (is(fit, "mvn")) {
+    if (methods::is(fit, "mvn")) {
       
       sample_comps <- rep(1, length(idx))
       means <- list(fit@Mean)

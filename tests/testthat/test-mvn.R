@@ -10,6 +10,7 @@ test_that("MVN Complete Data.", {
   
 })
 
+
 # -----------------------------------------------------------------------------
 
 test_that("MVN Incomplete Data.", {
@@ -21,3 +22,24 @@ test_that("MVN Incomplete Data.", {
   expect_equal(vcov(fit), diag(2), tolerance = 0.15, ignore_attr = TRUE)
   
 })
+
+
+# -----------------------------------------------------------------------------
+
+test_that("Rank deficient covariance matrix.", {
+  skip_on_cran()
+  withr::local_seed(101)
+  
+  d <- 10
+  n <- 9
+  data <- rGMM(
+    n = n, 
+    d = d, 
+    k = 1, 
+    means = rep(2, d),
+    miss = 0.1
+  )
+  fit <- expect_error(FitMVN(data, lambda = 1e-1, report = FALSE), NA)
+  
+})
+

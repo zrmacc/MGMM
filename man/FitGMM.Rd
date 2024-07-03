@@ -10,6 +10,7 @@ FitGMM(
   init_means = NULL,
   fix_means = FALSE,
   init_covs = NULL,
+  lambda = 0,
   init_props = NULL,
   maxit = 100,
   eps = 1e-06,
@@ -27,6 +28,9 @@ FitGMM(
 values.}
 
 \item{init_covs}{Optional list of initial covariance matrices.}
+
+\item{lambda}{Optional ridge term added to covariance matrix to ensure 
+positive definiteness.}
 
 \item{init_props}{Optional vector of initial cluster proportions.}
 

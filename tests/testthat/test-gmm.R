@@ -29,8 +29,8 @@ test_that("GMM Complete Data.", {
   
 })
 
-# -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
 
 test_that("GMM Incomplete Data.", {
   skip_on_cran()
@@ -59,3 +59,24 @@ test_that("GMM Incomplete Data.", {
   prop <- fit@Proportions
   expect_equal(prop, pi, tolerance = 0.1, ignore_attr = TRUE)
 })
+
+
+# -----------------------------------------------------------------------------
+
+test_that("Rank deficient covariance matrix.", {
+  skip_on_cran()
+  withr::local_seed(101)
+  
+  d <- 10
+  n <- 9
+  data <- rGMM(
+    n = n, 
+    d = d, 
+    k = 2, 
+    means = list(rep(2, d), rep(-2, d)),
+    miss = 0.1
+  )
+  fit <- expect_error(FitGMM(data, k = 1, lambda = 1e-1, report = FALSE), NA)
+  
+})
+

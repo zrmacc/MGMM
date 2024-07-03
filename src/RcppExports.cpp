@@ -12,15 +12,16 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // matCov
-SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat);
-RcppExport SEXP _MGMM_matCov(SEXP ASEXP, SEXP BSEXP, SEXP corMatSEXP) {
+SEXP matCov(const arma::mat A, const arma::mat B, const bool corMat, const double eps);
+RcppExport SEXP _MGMM_matCov(SEXP ASEXP, SEXP BSEXP, SEXP corMatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat >::type A(ASEXP);
     Rcpp::traits::input_parameter< const arma::mat >::type B(BSEXP);
     Rcpp::traits::input_parameter< const bool >::type corMat(corMatSEXP);
-    rcpp_result_gen = Rcpp::wrap(matCov(A, B, corMat));
+    Rcpp::traits::input_parameter< const double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(matCov(A, B, corMat, eps));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -132,7 +133,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MGMM_matCov", (DL_FUNC) &_MGMM_matCov, 3},
+    {"_MGMM_matCov", (DL_FUNC) &_MGMM_matCov, 4},
     {"_MGMM_eigSym", (DL_FUNC) &_MGMM_eigSym, 1},
     {"_MGMM_matDet", (DL_FUNC) &_MGMM_matDet, 2},
     {"_MGMM_matInv", (DL_FUNC) &_MGMM_matInv, 1},

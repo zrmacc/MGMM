@@ -9,13 +9,16 @@
 #' @param data Numeric data matrix.
 #' @param init_mean Optional initial mean vector.
 #' @param fix_mean Fix the means to their starting value? Must initialize
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return An object of class \code{mvn}.
 #' @noRd
 
 FitMVNComplete <- function(
   data,
   init_mean = NULL,
-  fix_mean = FALSE
+  fix_mean = FALSE,
+  lambda = 0
 ) {
   
   # Dimensions.
@@ -31,7 +34,7 @@ FitMVNComplete <- function(
   }
   
   # Covariance.
-  new_cov <- matCov(data, data)
+  new_cov <- matCov(data, data, eps = lambda)
   new_cov_inv <- matInv(new_cov)
   dimnames(new_cov) <- list(orig_col_names, orig_col_names)
   
@@ -39,7 +42,8 @@ FitMVNComplete <- function(
   n <- nrow(data)
   mean_mat <- matrix(data = new_mean, nrow = n, ncol = d, byrow = TRUE)
   resid <- data - mean_mat
-  objective <- -n * log(det(new_cov)) - tr(MMP(matInv(new_cov), matIP(resid, resid)))
+  objective <- -n * matDet(new_cov, logDet = TRUE) - 
+    tr(MMP(matInv(new_cov), matIP(resid, resid)))
   
   # Output.
   out <- methods::new(
@@ -61,13 +65,16 @@ FitMVNComplete <- function(
 #' @param data_comp Complete cases. 
 #' @param init_mean Optional initial mean vector.
 #' @param init_cov Optional initial covariance matrix.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return List containing the initialized `mean` and `cov`. 
 #' @noRd
 
 MVNMissInit <- function(
   data_comp,
   init_mean,
-  init_cov
+  init_cov,
+  lambda = 0
 ) {
   
   # Output structure. 
@@ -97,7 +104,7 @@ MVNMissInit <- function(
     
     # Initialize covariance if null.
     if (is.null(init_cov)) {
-      theta0$cov <- matCov(data_comp, data_comp)
+      theta0$cov <- matCov(data_comp, data_comp, eps = lambda)
     } else {
       theta0$cov <- init_cov
     }
@@ -115,6 +122,8 @@ MVNMissInit <- function(
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the current `mean` and `cov`. 
 #' @param fix_mean Fix the mean to its starting value? Must initialize. 
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return List containing:
 #' \itemize{
 #'   \item The updated `mean` and `cov`.
@@ -126,7 +135,8 @@ MVNMissInit <- function(
 MVNMissUpdate <- function(
   split_data,
   theta,
-  fix_mean = FALSE
+  fix_mean = FALSE,
+  lambda = 0
 ) {
   
   # Unpack
@@ -162,7 +172,8 @@ MVNMissUpdate <- function(
   }
  
   ## Initial EM objective. 
-  old_obj <- (-n) * log(det(old_cov)) - tr(MMP(matInv(old_cov), resid_cov))
+  old_obj <- (-n) * matDet(old_cov, logDet = TRUE) - 
+    tr(MMP(matInv(old_cov), resid_cov))
   
   # Update mean:
   if (fix_mean) {
@@ -186,7 +197,7 @@ MVNMissUpdate <- function(
   }
   
   # Update covariance.
-  new_cov <- array(0, c(d, d))
+  new_cov <- lambda * diag(d)
   
   ## Complete observations.
   if (n0 > 0) {
@@ -207,11 +218,11 @@ MVNMissUpdate <- function(
   }
   
   ## Normalize covariance matrix.
-  new_cov <- (new_cov / n)
+  new_cov <- (new_cov / n) 
   dimnames(new_cov) <- list(split_data$orig_col_names, split_data$orig_col_names)
   
   ## Final EM objective.
-  new_obj <- (-n) * log(det(new_cov)) - (d * n)
+  new_obj <- (-n) * matDet(new_cov, logDet = TRUE) - (d * n)
   
   # Increment.
   delta <- new_obj - old_obj
@@ -346,6 +357,8 @@ MVNMissImpute <- function(
 #' @param init_mean Optional initial mean vector.
 #' @param fix_mean Fix the means to their starting value? Must initialize.
 #' @param init_cov Optional initial covariance matrix.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
 #' @param report Report fitting progress?
@@ -354,12 +367,13 @@ MVNMissImpute <- function(
 
 FitMVNMiss <- function(
   data,
-  init_mean,
-  fix_mean,
-  init_cov,
-  maxit,
-  eps,
-  report 
+  init_mean = NULL, 
+  fix_mean = FALSE, 
+  init_cov = NULL, 
+  lambda = 0.0,
+  maxit = 100, 
+  eps = 1e-6, 
+  report = TRUE
 ) {
   
   # Partitioned data
@@ -369,11 +383,12 @@ FitMVNMiss <- function(
   theta0 <- MVNMissInit(
     split_data$data_comp,
     init_mean,
-    init_cov
+    init_cov,
+    lambda = lambda
   )
   
   # Maximization
-  Update <- function(theta) {MVNMissUpdate(split_data, theta, fix_mean)}
+  Update <- function(theta) {MVNMissUpdate(split_data, theta, fix_mean, lambda)}
   theta1 <- Maximization(theta0, Update, maxit, eps, report)
   
   # Imputation.
@@ -406,10 +421,11 @@ FitMVNMiss <- function(
 #' @param init_mean Optional initial mean vector.
 #' @param fix_mean Fix the mean to its starting value? Must initialize. 
 #' @param init_cov Optional initial covariance matrix.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
 #' @param report Report fitting progress?
-#' @importFrom stats complete.cases
 #' @return An object of class \code{mvn}.
 
 FitMVN <- function(
@@ -417,6 +433,7 @@ FitMVN <- function(
   init_mean = NULL, 
   fix_mean = FALSE, 
   init_cov = NULL, 
+  lambda = 0,
   maxit = 100, 
   eps = 1e-6, 
   report = TRUE
@@ -428,21 +445,23 @@ FitMVN <- function(
   # Case of no missingness.
   if (!is_mis) {
     out <- FitMVNComplete(
-      data,
-      init_mean,
-      fix_mean
+      data = data,
+      init_mean = init_mean,
+      fix_mean = fix_mean,
+      lambda = lambda
     )
     
   # Case with missingness.
   } else {
     out <- FitMVNMiss(
-      data,
-      init_mean,
-      fix_mean,
-      init_cov,
-      maxit,
-      eps,
-      report
+      data = data,
+      init_mean = init_mean,
+      fix_mean = fix_mean,
+      init_cov = init_cov,
+      lambda = lambda,
+      maxit = maxit,
+      eps = eps,
+      report = report
     )
   }
   return(out)

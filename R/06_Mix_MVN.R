@@ -1,5 +1,5 @@
 # Purpose: Fits a multivariate normal mixture in the presence of missingness.
-# Updated: 2021-07-24
+# Updated: 2024-07-02
 
 #------------------------------------------------------------------------------
 
@@ -10,6 +10,8 @@
 #' @param init_means Optional list of initial mean vectors.
 #' @param init_covs Optional list of initial covariance matrices.
 #' @param init_props Optional vector of initial cluster proportions.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return List containing initial parameter values.
 #' @noRd
 
@@ -18,7 +20,8 @@ MixInit <- function(
   k, 
   init_means,
   init_covs,
-  init_props
+  init_props,
+  lambda = 0
 ) {
   
   # Unpack.
@@ -59,7 +62,7 @@ MixInit <- function(
     if (is.null(init_covs)) {
       theta0$covs <- lapply(seq_len(k), function(i) {
         clust <- data_comp[cluster_assignment == i, , drop = FALSE]
-        return(matCov(clust, clust))
+        return(matCov(clust, clust, eps = lambda))
       })
     } else {
       theta0$covs <- init_covs
@@ -142,6 +145,8 @@ MixClusterSizes <- function(
 #' @param old_means List of previous means. 
 #' @param covs List of component covariances.
 #' @param gamma List of component responsibilities. 
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return List of k responsibility-weighted expected residual outer products. 
 #' @noRd
 
@@ -150,7 +155,8 @@ MixResidOP <- function(
   new_means,
   old_means,
   covs,
-  gamma
+  gamma,
+  lambda = 0
 ) {
   
   # Unpack.
@@ -162,7 +168,7 @@ MixResidOP <- function(
   # Loop over mixture components. 
   out <- lapply(seq_len(k), function(j) {
     
-    resid_op <- array(0, dim = c(d, d))
+    resid_op <- lambda * diag(d)
     
     ## Complete cases.
     if (n0 > 0) {
@@ -219,7 +225,7 @@ MixEMObj <- function(
   
   # Determinant term.
   det_term <- lapply(1:k, function(j) {
-    cluster_sizes[j] * log(det(covs[[j]]))
+    cluster_sizes[j] * matDet(covs[[j]], logDet = TRUE)
   })
   det_term <- do.call(sum, det_term)
   
@@ -300,6 +306,8 @@ MixUpdateMeans <- function(
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the current `means`, `covs`, `pi`, and `gamma`.
 #' @param fix_means Fix the mean to its starting value? Must initialize. 
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @return List containing:
 #' \itemize{
 #'   \item The updated `mean`, `cov`, `pi`, and `gamma`.
@@ -311,7 +319,8 @@ MixUpdateMeans <- function(
 MixUpdate <- function(
   split_data,
   theta,
-  fix_means
+  fix_means,
+  lambda = 0
 ) {
   
   # Previous parameters.
@@ -332,7 +341,8 @@ MixUpdate <- function(
     old_means,
     old_means,
     old_covs,
-    old_gamma
+    old_gamma,
+    lambda = lambda
   )
   
   # Initial objective.
@@ -351,7 +361,7 @@ MixUpdate <- function(
       split_data,
       old_means,
       old_covs,
-      old_gamma 
+      old_gamma
     )
   }
   
@@ -362,7 +372,8 @@ MixUpdate <- function(
     new_means,
     old_means,
     old_covs,
-    old_gamma
+    old_gamma,
+    lambda = lambda
   )
   
   ## Normalize covariance matrices. 
@@ -574,6 +585,8 @@ MixImpute <- function(
 #' @param init_means Optional list of initial mean vectors.
 #' @param fix_means Fix means to their starting values? Must initialize. 
 #' @param init_covs Optional list of initial covariance matrices.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
@@ -586,6 +599,7 @@ FitMix <- function(
   init_means = NULL, 
   fix_means = FALSE, 
   init_covs = NULL, 
+  lambda = 0,
   init_props = NULL, 
   maxit = 100, 
   eps = 1e-6, 
@@ -596,10 +610,17 @@ FitMix <- function(
   split_data <- PartitionData(data)
 
   # Initialization.
-  theta0 <- MixInit(split_data, k, init_means, init_covs, init_props)
+  theta0 <- MixInit(
+    split_data = split_data, 
+    k = k, 
+    init_means = init_means, 
+    init_covs = init_covs, 
+    init_props = init_props,
+    lambda = lambda
+  )
 
   # Maximzation.
-  Update <- function(theta) {MixUpdate(split_data, theta, fix_means)}
+  Update <- function(theta) {MixUpdate(split_data, theta, fix_means, lambda)}
   theta1 <- Maximization(theta0, Update, maxit, eps, report)
 
   # Cluster assignments.

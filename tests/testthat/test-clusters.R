@@ -13,7 +13,7 @@ test_that("Clustering on Complete Data.", {
     means = list(mu1, mu2, mu3),
     miss = 0
   )
-  choose_k <- ChooseK(data, k0 = 2, k1 = 4, report = FALSE)
+  choose_k <- ChooseK(data, k0 = 2, k1 = 4, boot = 10, report = FALSE)
   expect_true(3 %in% choose_k$Choices$k_opt)
   expect_true(3 %in% choose_k$Choices$k_1se)
 })

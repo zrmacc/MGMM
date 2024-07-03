@@ -8,10 +8,11 @@
 #' @param A NxP matrix.
 #' @param B NxQ matrix.
 #' @param corMat Return correlation matrix? If false, returns a covariance matrix.
+#' @param eps Optional ridge parameter added to the diagonal of the covariance matrix.
 #' @return Numeric matrix. 
 #' @noRd
-matCov <- function(A, B, corMat = FALSE) {
-    .Call(`_MGMM_matCov`, A, B, corMat)
+matCov <- function(A, B, corMat = FALSE, eps = 0.0) {
+    .Call(`_MGMM_matCov`, A, B, corMat, eps)
 }
 
 #' Eigenvalues of Symmetric Matrix. 

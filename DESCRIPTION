@@ -1,7 +1,7 @@
 Package: MGMM
 Title: Missingness Aware Gaussian Mixture Models 
-Date: 2023-04-27
-Version: 1.0.1
+Date: 2024-07-02
+Version: 1.0.1.2
 Authors@R: 
     person(given = "Zachary",
            family = "McCaw",
@@ -18,6 +18,7 @@ LinkingTo:
 	RcppArmadillo
 Imports:
 	cluster,
+	glue,
 	methods, 
 	mvnfast,
 	plyr,
@@ -29,5 +30,5 @@ Suggests:
     rmarkdown,
     withr
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3

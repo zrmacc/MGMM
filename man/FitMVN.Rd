@@ -9,6 +9,7 @@ FitMVN(
   init_mean = NULL,
   fix_mean = FALSE,
   init_cov = NULL,
+  lambda = 0,
   maxit = 100,
   eps = 1e-06,
   report = TRUE
@@ -22,6 +23,9 @@ FitMVN(
 \item{fix_mean}{Fix the mean to its starting value? Must initialize.}
 
 \item{init_cov}{Optional initial covariance matrix.}
+
+\item{lambda}{Optional ridge term added to covariance matrix to ensure 
+positive definiteness.}
 
 \item{maxit}{Maximum number of EM iterations.}
 

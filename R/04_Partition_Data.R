@@ -1,5 +1,5 @@
 # Purpose: Partition data by missingness pattern.
-# Updated: 2021-12-09
+# Updated: 2023-09-30
 
 
 #' Partition Data by Missingness Pattern
@@ -24,7 +24,7 @@ PartitionData <- function(data) {
   
   d <- ncol(data)
   idx <- seq(1:nrow(data))
-  is_comp <- complete.cases(data)
+  is_comp <- stats::complete.cases(data)
   is_incomp <- !is_comp
   
   # Complete cases

@@ -269,6 +269,8 @@ ClustQual <- function(fit) {
 #' @param init_means Optional list of initial mean vectors.
 #' @param fix_means Fix the means to their starting value? Must initialize.
 #' @param init_covs Optional list of initial covariance matrices.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
@@ -282,6 +284,7 @@ ChooseKIter <- function(
   init_means,
   fix_means, 
   init_covs, 
+  lambda,
   init_props, 
   maxit, 
   eps
@@ -290,14 +293,15 @@ ChooseKIter <- function(
   # Attempt fit. 
   fit <- tryCatch(
     expr = FitGMM(
-      data, 
-      k, 
-      init_means, 
-      fix_means, 
-      init_covs,
-      init_props, 
-      maxit, 
-      eps, 
+      data = data, 
+      k = k, 
+      init_means = init_means, 
+      fix_means = fix_means, 
+      init_covs = init_covs,
+      lambda = lambda,
+      init_props = init_props, 
+      maxit = maxit, 
+      eps = eps, 
       report = FALSE
     ),
     error = function(cond) {return(NULL)}
@@ -337,7 +341,7 @@ ChooseKSummarize <- function(
     
     # Report. 
     if (report) {
-      cat("Model fails to fit observed data at cluster size: ", k, ".\n")
+      cat(glue::glue("Model fails to fit observed data at cluster size: {k}.\n\n"))
     }
     return(NULL)
   } else {
@@ -345,7 +349,7 @@ ChooseKSummarize <- function(
     nb <- nrow(boot_metrics)
     # Report. 
     if (report) {
-      cat("Cluster size", k, "complete.", nb, "fit(s) succeeded.\n")
+      cat(glue::glue("Cluster size {k} complete. {nb} fit(s) succeeded.\n\n"))
     }
     
     # Number of successful fits. 
@@ -379,6 +383,8 @@ ChooseKSummarize <- function(
 #' @param init_means Optional list of initial mean vectors.
 #' @param fix_means Fix the means to their starting value? Must initialize.
 #' @param init_covs Optional list of initial covariance matrices.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
@@ -393,6 +399,7 @@ ChooseKBootstrap <- function(
   init_means,
   fix_means, 
   init_covs, 
+  lambda,
   init_props, 
   maxit, 
   eps
@@ -401,14 +408,15 @@ ChooseKBootstrap <- function(
   # Fitting procedure. 
   fit_wrapper <- function (data){
     out <- ChooseKIter(
-      data, 
-      k,
-      init_means,
-      fix_means, 
-      init_covs, 
-      init_props, 
-      maxit, 
-      eps
+      data = data, 
+      k = k,
+      init_means = init_means,
+      fix_means = fix_means, 
+      init_covs = init_covs, 
+      lambda = lambda,
+      init_props = init_props, 
+      maxit = maxit, 
+      eps = eps
     )
     return(out)
   }
@@ -514,6 +522,8 @@ ChooseKRecommend <- function(
 #' @param fix_means Fix the means to their starting value? Must provide initial
 #'   values.
 #' @param init_covs Optional list of initial covariance matrices.
+#' @param lambda Optional ridge term added to covariance matrix to ensure 
+#'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
@@ -543,6 +553,7 @@ ChooseK <- function(
   init_means = NULL,
   fix_means = FALSE, 
   init_covs = NULL, 
+  lambda = 0,
   init_props = NULL, 
   maxit = 10, 
   eps = 1e-4, 
@@ -566,15 +577,16 @@ ChooseK <- function(
   # Loop over candidate cluster sizes.
   results <- lapply(candidates, function(k) {
     boot_metrics <- ChooseKBootstrap(
-      boot,
-      data, 
-      k,
-      init_means,
-      fix_means, 
-      init_covs, 
-      init_props, 
-      maxit, 
-      eps
+      boot = boot,
+      data = data, 
+      k = k,
+      init_means = init_means,
+      fix_means = fix_means, 
+      init_covs = init_covs, 
+      lambda = lambda,
+      init_props = init_props, 
+      maxit = maxit, 
+      eps = eps
     )
     boot_results <- ChooseKSummarize(k, boot_metrics, report)
     return(boot_results)
