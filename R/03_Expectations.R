@@ -47,7 +47,7 @@ EvalDensIncompObs <- function(
 #' Responsibilities
 #'
 #' Posterior probability of cluster j for observation i given observed data;
-#' paper eq. (3) and (8): γ_ij = f(y_obs|μ_j, Σ_j) π_j / Σ_l f(y_obs|μ_l, Σ_l) π_l.
+#' paper eq. (3) and (8): \eqn{\gamma_{ij} = f(y_{obs}|\mu_j, \Sigma_j) \pi_j / \sum_l f(y_{obs}|\mu_l, \Sigma_l) \pi_l}{gamma_ij = f(y_obs|mu_j, Sigma_j) pi_j / sum_l f(y_obs|mu_l, Sigma_l) pi_l}.
 #'
 #' @param split_data Data partitioned by missingness.
 #' @param means List of mean vectors.
@@ -117,8 +117,8 @@ Responsibility <- function(
 
 #' Working Response Vector
 #'
-#' Working response ŷ_ij per paper eq. (4): (y_obs, E[y_miss | z_ij=1, y_obs]),
-#' with E[y_miss | ...] = μ_miss + Σ_miss,obs Σ_obs,obs^{-1} (y_obs - μ_obs).
+#' Working response \eqn{\hat{y}_{ij}}{y_ij} per paper eq. (4): (y_obs, E[y_miss | z_ij=1, y_obs]),
+#' with \eqn{E[y_{miss} | \ldots] = \mu_{miss} + \Sigma_{miss,obs} \Sigma_{obs,obs}^{-1} (y_{obs} - \mu_{obs})}{E[y_miss | ...] = mu_miss + Sigma_miss,obs Sigma_obs,obs^{-1} (y_obs - mu_obs)}.
 #' 
 #' @param y Vector with missing elements.
 #' @param mean Numeric mean.
@@ -145,7 +145,7 @@ WorkRespIndiv <- function(
   perm <- c(which(is_obs), which(is_mis))
   rev_perm <- order(perm)
   
-  # Partition covariance: Σ_obs,obs, Σ_miss,obs per paper eq. (4).
+  # Partition covariance: Sigma_obs,obs, Sigma_miss,obs per paper eq. (4).
   cov_mis_obs <- cov[is_mis, is_obs, drop = FALSE]
   var_obs_obs <- cov[is_obs, is_obs, drop = FALSE]
   var_obs_obs_inv <- matInv(var_obs_obs)
@@ -153,7 +153,7 @@ WorkRespIndiv <- function(
   # Observed components.
   obs_ele <- matrix(y[is_obs], ncol = 1)
   
-  # Conditional expectation of missing given observed: μ_miss + Σ_miss,obs Σ_obs,obs^{-1} (y_obs - μ_obs).
+  # Conditional expectation of missing given observed: mu_miss + Sigma_miss,obs Sigma_obs,obs^{-1} (y_obs - mu_obs).
   mis_ele <- mean[is_mis] + MMP(cov_mis_obs, MMP(var_obs_obs_inv, obs_ele - mean[is_obs]))
   
   # Working response.
@@ -208,15 +208,15 @@ WorkResp <- function(
 
 #' Expected Residual Outer Product
 #'
-#' Working residual outer product per paper eq. (5): γ_ij [ (ŷ_ij - μ_j)(ŷ_ij - μ_j)'
-#' + (0 0; 0 Λ^{-1}_{j,TT}) ], where Λ^{-1} is the conditional covariance of missing
+#' Working residual outer product per paper eq. (5): \eqn{\gamma_{ij}}{gamma_ij} [ \eqn{(\hat{y}_{ij} - \mu_j)(\hat{y}_{ij} - \mu_j)'}{(y_ij - mu_j)(y_ij - mu_j)'}
+#' + (0 0; 0 \eqn{\Lambda^{-1}_{j,TT}}{Lambda^{-1}}) ], where \eqn{\Lambda^{-1}}{Lambda^{-1}} is the conditional covariance of missing
 #' given observed (Schur complement).
 #'
 #' @param data_incomp Data for observations with missingness.
-#' @param new_mean New mean μ_j (used in residual).
+#' @param new_mean New mean \eqn{\mu_j}{mu_j} (used in residual).
 #' @param old_mean Previous mean (used for conditional expectation).
 #' @param old_cov Previous covariance (used for working response and Schur complement).
-#' @param gamma Responsibilities γ_ij.
+#' @param gamma Responsibilities \eqn{\gamma_{ij}}{gamma_ij}.
 #' @return Numeric matrix, the responsibility-weighted sum of working residual outer products.
 #' @noRd
 
@@ -245,7 +245,7 @@ ExpResidOP <- function(
     cov_mis_obs <- old_cov[is_mis, is_obs, drop = FALSE]
     var_obs_obs <- old_cov[is_obs, is_obs, drop = FALSE]
     var_obs_obs_inv <- matInv(var_obs_obs)
-    # Conditional covariance of missing given observed (Schur complement) = Λ^{-1} in paper eq. (5).
+    # Conditional covariance of missing given observed (Schur complement) = Lambda^{-1} in paper eq. (5).
     cond_cov_miss <- SchurC(var_mis_mis, var_obs_obs, cov_mis_obs)
 
     obs_ele <- matrix(y[is_obs], ncol = 1)

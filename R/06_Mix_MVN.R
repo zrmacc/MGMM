@@ -205,14 +205,14 @@ MixResidOP <- function(
 
 #' EM Objective for a Gaussian Mixture Model
 #'
-#' Evaluates the ECM objective Q in paper eq. (6): Q = Σ_j n_j ln π_j
-#' - (1/2) Σ_j n_j ln det(Σ_j) - (1/2) Σ_j tr(Σ_j^{-1} V̂_j). Stored value is 2*Q
+#' Evaluates the ECM objective Q in paper eq. (6): \eqn{Q = \sum_j n_j \ln \pi_j}{Q = sum_j n_j ln pi_j}
+#' \eqn{- (1/2) \sum_j n_j \ln \det(\Sigma_j) - (1/2) \sum_j \mathrm{tr}(\Sigma_j^{-1} \hat{V}_j)}{- (1/2) sum_j n_j ln det(Sigma_j) - (1/2) sum_j tr(Sigma_j^{-1} V_j)}. Stored value is 2*Q
 #' so the scale matches the single-component (2 * log L) objective.
 #'
-#' @param cluster_sizes Cluster sizes n_j = Σ_i γ_ij.
+#' @param cluster_sizes Cluster sizes \eqn{n_j = \sum_i \gamma_{ij}}{n_j = sum_i gamma_ij}.
 #' @param pi Cluster proportions.
 #' @param covs List of component covariances.
-#' @param resid_ops List of working residual outer products V̂_j.
+#' @param resid_ops List of working residual outer products \eqn{\hat{V}_j}{V_j}.
 #' @return Numeric objective value (2*Q).
 #' @noRd
 
@@ -223,7 +223,7 @@ MixEMObj <- function(
   resid_ops
 ) {
   k <- length(pi)
-  # Paper eq. (6): Q = Σ n_j ln π_j - (1/2) Σ n_j ln det(Σ_j) - (1/2) Σ tr(Σ_j^{-1} V̂_j).
+  # Paper eq. (6): Q = sum n_j ln pi_j - (1/2) sum n_j ln det(Sigma_j) - (1/2) sum tr(Sigma_j^{-1} V_j).
   pi_term <- sum(cluster_sizes * log(pi))
   det_term <- sum(vapply(seq_len(k), function(j) {
     cluster_sizes[j] * matDet(covs[[j]], logDet = TRUE)
@@ -241,7 +241,7 @@ MixEMObj <- function(
 
 #' Mean Update for Mixture of MVNs with Missingness.
 #'
-#' Paper eq. (7): μ_j^(r+1) = (1/n_j) Σ_i γ_ij ŷ_ij (responsibility-weighted average of working responses).
+#' Paper eq. (7): \eqn{\mu_j^{(r+1)} = (1/n_j) \sum_i \gamma_{ij} \hat{y}_{ij}}{mu_j^(r+1) = (1/n_j) sum_i gamma_ij y_ij} (responsibility-weighted average of working responses).
 #'
 #' @param split_data Data partitioned by missingness.
 #' @param means List of component means.
@@ -383,7 +383,7 @@ MixUpdate <- function(
     return(new_cov)
   })
   
-  ## Update responsibilities (paper eq. (8): γ(r+1) given μ(r+1), Σ(r+1), π(r)).
+  ## Update responsibilities (paper eq. (8): gamma(r+1) given mu(r+1), Sigma(r+1), pi(r)).
   new_gamma <- Responsibility(
     split_data,
     new_means,
@@ -391,11 +391,11 @@ MixUpdate <- function(
     old_pi
   )
   
-  ## Update cluster proportions (paper: π(r+1)_j = n(r+1)_j / n).
+  ## Update cluster proportions (paper: pi(r+1)_j = n(r+1)_j / n).
   new_cluster_sizes <- MixClusterSizes(split_data, new_gamma)
   new_pi <- new_cluster_sizes / sum(new_cluster_sizes)
   
-  ## New ECM objective Q(r+1) at (π(r+1), θ(r+1)) per paper eq. (6).
+  ## New ECM objective Q(r+1) at (pi(r+1), theta(r+1)) per paper eq. (6).
   new_obj <- MixEMObj(
     new_cluster_sizes,
     new_pi,

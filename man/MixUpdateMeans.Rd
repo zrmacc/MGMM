@@ -19,5 +19,5 @@ MixUpdateMeans(split_data, means, covs, gamma)
 List containing the updated component means.
 }
 \description{
-Paper eq. (7): μ_j^(r+1) = (1/n_j) Σ_i γ_ij ŷ_ij (responsibility-weighted average of working responses).
+Paper eq. (7): \eqn{\mu_j^{(r+1)} = (1/n_j) \sum_i \gamma_{ij} \hat{y}_{ij}}{mu_j^(r+1) = (1/n_j) sum_i gamma_ij y_ij} (responsibility-weighted average of working responses).
 }
