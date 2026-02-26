@@ -2,11 +2,15 @@
 % Please edit documentation in R/MGMM-package.R
 \docType{package}
 \name{MGMM-package}
-\alias{MGMM}
 \alias{MGMM-package}
-\title{MGMM: Missingness Aware Gaussian Mixture Models}
+\alias{MGMM}
+\alias{_PACKAGE}
+\title{Missingness-Aware Gaussian Mixture Models}
 \description{
-Parameter estimation and classification for Gaussian Mixture Models (GMMs) in the presence of missing data. This package complements existing implementations by allowing for both missing elements in the input vectors and full (as opposed to strictly diagonal) covariance matrices. Estimation is performed using an expectation conditional maximization algorithm that accounts for missingness of both the cluster assignments and the vector components. The output includes the marginal cluster membership probabilities; the mean and covariance of each cluster; the posterior probabilities of cluster membership; and a completed version of the input data, with missing values imputed to their posterior expectations. For additional details, please see McCaw ZR, Julienne H, Aschard H. "Fitting Gaussian mixture models on incomplete data." \doi{10.1186/s12859-022-04740-9}.
+Estimate and classify using Gaussian mixture models (GMMs) when the input
+contains missing values. Uses an expectation–conditional maximization (ECM)
+algorithm with support for full component covariances and optional ridge
+regularization. See McCaw et al. (2022) <doi:10.1186/s12859-022-04740-9>.
 }
 \author{
 \strong{Maintainer}: Zachary McCaw \email{zmccaw@alumni.harvard.edu} (\href{https://orcid.org/0000-0002-2006-9828}{ORCID})

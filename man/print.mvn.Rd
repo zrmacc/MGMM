@@ -2,7 +2,7 @@
 % Please edit documentation in R/01_Class.R
 \name{print.mvn}
 \alias{print.mvn}
-\title{Print for Fitted MVN Model}
+\title{Print Fitted MVN Model}
 \usage{
 \method{print}{mvn}(x, ...)
 }
@@ -11,6 +11,9 @@
 
 \item{...}{Unused.}
 }
+\value{
+Invisibly returns \code{x}.
+}
 \description{
-Print for Fitted MVN Model
+Print Fitted MVN Model
 }

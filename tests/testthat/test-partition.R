@@ -46,3 +46,21 @@ test_that("Reconstitute data.", {
   expect_equal(data, recov_data)
   
 })
+
+# -----------------------------------------------------------------------------
+
+test_that("PartitionData works with matrix input and preserves names.", {
+  dat <- matrix(c(1, 2, NA, 4, NA, NA), nrow = 3, ncol = 2,
+                dimnames = list(c("a", "b", "c"), c("x", "y")))
+  part <- PartitionData(dat)
+  expect_equal(part$orig_row_names, c("a", "b", "c"))
+  expect_equal(part$orig_col_names, c("x", "y"))
+  expect_equal(part$n_row, 3)
+  expect_equal(part$n_col, 2)
+  expect_equal(part$n0, 1)
+  expect_equal(part$n1, 1)
+  expect_equal(part$n2, 1)
+  recov <- ReconstituteData(part)
+  expect_equal(rownames(recov), c("a", "b", "c"))
+  expect_equal(colnames(recov), c("x", "y"))
+})

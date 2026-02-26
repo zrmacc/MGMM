@@ -156,3 +156,17 @@ test_that("Test combination of multiple imputations.", {
   expect_equal(exp_vcov, as.numeric(out$cov))
   
 })
+
+# -----------------------------------------------------------------------------
+
+test_that("CombineMIs with vector-valued points and matrix covs.", {
+  # Simulate 2d point estimates and 2x2 covariance from each imputation.
+  points <- list(c(1, 2), c(1.1, 2.1), c(0.9, 1.9))
+  covs <- list(diag(2) * 0.1, diag(2) * 0.12, diag(2) * 0.11)
+  out <- CombineMIs(points, covs)
+  expect_equal(length(out$point), 2)
+  expect_equal(dim(out$cov), c(2, 2))
+  expect_true(all(diag(out$cov) > 0))
+  # Point should be near (1, 2)
+  expect_equal(out$point, c(1, 2), tolerance = 0.2, ignore_attr = TRUE)
+})

@@ -29,8 +29,8 @@ values.}
 
 \item{init_covs}{Optional list of initial covariance matrices.}
 
-\item{lambda}{Optional ridge term added to covariance matrix to ensure 
-positive definiteness.}
+\item{lambda}{Optional ridge term added to each component covariance matrix
+to ensure positive definiteness.}
 
 \item{init_props}{Optional vector of initial cluster proportions.}
 
@@ -57,11 +57,12 @@ at random (MAR) in the input vectors.
 }
 \details{
 Initial values for the cluster means, covariances, and proportions are
-specified using \code{M0}, \code{S0}, and \code{pi0}, respectively. If the
-data contains complete observations, i.e. observations with no missing
-elements, then \code{fit.GMM} will attempt to initialize these parameters
-internally using K-means. If the data contains no complete observations, then
-initial values are required for \code{M0}, \code{S0}, and \code{pi0}.
+specified using \code{init_means}, \code{init_covs}, and \code{init_props},
+respectively. If the data contain complete observations (rows with no
+missing elements), \code{FitGMM} will attempt to initialize these parameters
+internally using K-means. If there are no complete observations, initial
+values are required for \code{init_means}, \code{init_covs}, and
+\code{init_props}.
 }
 \examples{
 \donttest{
@@ -95,7 +96,7 @@ n = 1000,
 d = 2, 
 k = 4, 
 pi = c(0.35, 0.15, 0.15, 0.35), 
-m = 0.1, 
+miss = 0.1, 
 means = mean_list, 
 covs = sigma)
 fit <- FitGMM(data, k = 4)

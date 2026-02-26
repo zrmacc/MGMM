@@ -2,7 +2,7 @@
 % Please edit documentation in R/01_Class.R
 \name{logLik.mix}
 \alias{logLik.mix}
-\title{Log likelihood for Fitted GMM}
+\title{Log-Likelihood for Fitted GMM}
 \usage{
 \method{logLik}{mix}(object, ...)
 }
@@ -11,6 +11,10 @@
 
 \item{...}{Unused.}
 }
+\value{
+Numeric scalar (the stored EM objective).
+}
 \description{
-Log likelihood for Fitted GMM
+Returns the final EM objective; for models with missing data this is not
+the exact log-likelihood of the observed data.
 }

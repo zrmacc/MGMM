@@ -11,6 +11,9 @@
 
 \item{...}{Unused.}
 }
+\value{
+The estimated covariance matrix.
+}
 \description{
 Covariance for Fitted MVN Model
 }

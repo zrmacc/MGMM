@@ -8,9 +8,9 @@
 
 #' Partition Data by Cluster Assignment
 #'
-#' @param data Numeric data.matrix.
-#' @param assign Cluster assignments.
-#' @return List of numeric data.matrices, separated by cluster assignment.
+#' @param data Numeric data matrix.
+#' @param assign Vector of cluster assignments.
+#' @return List of numeric matrices, one per cluster.
 #' @noRd
 
 PartitionByClust <- function(
@@ -50,14 +50,15 @@ WithinClusterDisp <- function(
 }
 
 
-#' Calinski-Harabaz Index
+#' Calinski-Harabasz Index
 #'
-#' Calculates the Calinski-Harabaz index.
+#' Calculates the Calinski-Harabasz index (ratio of between-cluster to
+#' within-cluster dispersion; higher values indicate better separation).
 #'
-#' @param data Observations.
-#' @param assign Assignments.
-#' @param means List of cluster means.
-#' @return Scalar metric.
+#' @param data Numeric matrix of observations.
+#' @param assign Vector of cluster assignments.
+#' @param means List of cluster mean vectors.
+#' @return Numeric scalar; higher values indicate better separation.
 
 CalHar <- function(data, assign, means) {
   
@@ -123,12 +124,14 @@ ClustDiam <- function(
 
 #' Davies-Bouldin Index
 #'
-#' Calculates the Davies-Bouldin index.
+#' Calculates the Davies-Bouldin index (average similarity between each
+#' cluster and its most similar counterpart; lower values indicate better
+#' separation).
 #'
-#' @param data Observations
-#' @param assign Assignments
-#' @param means List of cluster means
-#' @return Scalar index.
+#' @param data Numeric matrix of observations.
+#' @param assign Vector of cluster assignments.
+#' @param means List of cluster mean vectors.
+#' @return Numeric scalar; lower values indicate better separation.
 
 DavBou <- function(
   data,
@@ -185,10 +188,10 @@ DavBou <- function(
 #'
 #' Evaluates cluster quality. Returns the following metrics:
 #' \itemize{
-#' \item BIC: Bayesian Information Criterion, lower value indicates better clustering quality.
-#' \item CHI: Calinski-Harabaz Index, higher value indicates better clustering quality.
-#' \item DBI: Davies-Bouldin, lower value indicates better clustering quality.
-#' \item SIL: Silhouette Width, higher value indicates better clustering quality.
+#' \item BIC: Bayesian Information Criterion; lower is better.
+#' \item CHI: Calinski-Harabasz index; higher is better.
+#' \item DBI: Davies-Bouldin index; lower is better.
+#' \item SIL: Mean silhouette width; higher is better.
 #' }
 #'
 #' @param fit Object of class mix.
@@ -267,15 +270,16 @@ ClustQual <- function(fit) {
 #' @param data Numeric data matrix.
 #' @param k Number of clusters.
 #' @param init_means Optional list of initial mean vectors.
-#' @param fix_means Fix the means to their starting value? Must initialize.
+#' @param fix_means Fix the means to their starting values? Initial values
+#'   must be provided if \code{TRUE}.
 #' @param init_covs Optional list of initial covariance matrices.
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
-#' @return Numeric vector containing the 4 cluster quality metrics. Returns
-#'   null if the model fails to fit.
+#' @return Numeric vector of the four cluster quality metrics (BIC, CHI, DBI, SIL),
+#'   or \code{NULL} if the model fails to fit.
 #' @noRd
 
 ChooseKIter <- function(
@@ -326,9 +330,9 @@ ChooseKIter <- function(
 #' @param k Clusters.
 #' @param boot_metrics Bootstrapped quality metrics. 
 #' @param report Report bootstrap results? 
-#' @return Either a data.frame reporting the means and standard errors
-#'   of the quality metrics, or NULL if too few fits succeeded to calculate
-#'  standard errors. 
+#' @return Either a data frame with the mean and standard error of each
+#'   quality metric at the given cluster number, or \code{NULL} if too few
+#'   fits succeeded to compute standard errors. 
 #' @noRd
 
 ChooseKSummarize <- function(
@@ -379,17 +383,18 @@ ChooseKSummarize <- function(
 #' @param boot Number of bootstrap replicates.
 #' @param data Numeric data matrix.
 #' @param k Number of clusters.
-#' @param boot Bootstrap replicates.
 #' @param init_means Optional list of initial mean vectors.
-#' @param fix_means Fix the means to their starting value? Must initialize.
+#' @param fix_means Fix the means to their starting values? Initial values
+#'   must be provided if \code{TRUE}.
 #' @param init_covs Optional list of initial covariance matrices.
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
 #' @param init_props Optional vector of initial cluster proportions.
 #' @param maxit Maximum number of EM iterations.
 #' @param eps Minimum acceptable increment in the EM objective.
-#' @return Numeric matrix of clustering metrics. Returns null if the models
-#'   fails to fit the observed data.
+#' @return Numeric matrix of clustering metrics (one row per bootstrap
+#'   replicate). Returns \code{NULL} if the model fails to fit the observed
+#'   data.
 #' @noRd
 
 ChooseKBootstrap <- function(
@@ -449,10 +454,10 @@ ChooseKBootstrap <- function(
 
 #' Recommend Cluster Number based on Bootstrap Results.
 #' 
-#' @param results Data.frame of bootstrap results.
+#' @param results Data frame of bootstrap results from \code{ChooseKSummarize}.
 #' @param metric String, metric of interest.
 #' @param max_opt Is maximizing the metric optimal? 
-#' @return Data.frame containing:
+#' @return Data frame containing:
 #' \itemize{
 #'   \item `Metric` name.
 #'   \item Optimal cluster number `k_opt` and metric value `Metric_opt`.

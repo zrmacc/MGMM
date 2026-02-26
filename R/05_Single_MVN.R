@@ -8,7 +8,8 @@
 #'
 #' @param data Numeric data matrix.
 #' @param init_mean Optional initial mean vector.
-#' @param fix_mean Fix the means to their starting value? Must initialize
+#' @param fix_mean Fix the mean to its starting value? Initial values must be
+#'   provided if \code{TRUE}.
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
 #' @return An object of class \code{mvn}.
@@ -21,25 +22,19 @@ FitMVNComplete <- function(
   lambda = 0
 ) {
   
-  # Dimensions.
   n <- nrow(data)
   d <- ncol(data)
   orig_col_names <- colnames(data)
-  
-  # Mean.
+
   if (fix_mean) {
     new_mean <- init_mean
   } else {
     new_mean <- apply(data, 2, mean)
   }
-  
-  # Covariance.
+
   new_cov <- matCov(data, data, eps = lambda)
-  new_cov_inv <- matInv(new_cov)
   dimnames(new_cov) <- list(orig_col_names, orig_col_names)
-  
-  # Objective (log-likelihood).
-  n <- nrow(data)
+
   mean_mat <- matrix(data = new_mean, nrow = n, ncol = d, byrow = TRUE)
   resid <- data - mean_mat
   objective <- -n * matDet(new_cov, logDet = TRUE) - 
@@ -87,7 +82,7 @@ MVNMissInit <- function(
     theta0$mean <- init_mean
     theta0$cov <- init_cov
     
-  # Case 2: At least one of init_means or S0 is null
+  # Case 2: At least one of init_mean or init_cov is null
   } else {
     
     # Check for complete obs
@@ -121,7 +116,8 @@ MVNMissInit <- function(
 #' 
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the current `mean` and `cov`. 
-#' @param fix_mean Fix the mean to its starting value? Must initialize. 
+#' @param fix_mean Fix the mean to its starting value? Initial values must be
+#'   provided if \code{TRUE}. 
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
 #' @return List containing:
@@ -271,13 +267,13 @@ Maximization <- function(
     if (theta1$delta > 0) {
       theta0 <- theta1
       if (report) {
-        cat("Objective increment: ", signif(theta1$d, digits = 3), "\n")
+        cat("Objective increment: ", signif(theta1$delta, digits = 3), "\n")
       }
     }
     
     # Terminate if increment is below tolerance.
     if (theta1$delta < eps) {
-      # If EM failes to perform any updates, e.g. the iteration is initialized
+      # If EM fails to perform any updates, e.g. the iteration is initialized
       # at the MLE, keep initial objective.
       if (i == 1) {
         theta0$new_obj <- theta1$old_obj
@@ -306,46 +302,26 @@ Maximization <- function(
 #' 
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the `mean` and `cov`.
-#' @return Data.matrix, in the same order as the original data, with missing values
-#'   imputed to their expectations. 
+#' @return Numeric matrix in the same row order as the original data, with
+#'   missing values imputed to their posterior expectations. 
 #' @noRd
 
-MVNMissImpute <- function(
-  split_data,
-  theta
-) {
-  
-  d <- split_data$n_col 
-  out <- matrix(NA, nrow = 0, ncol = d)
-  
-  # Complete data.
+MVNMissImpute <- function(split_data, theta) {
+  d <- split_data$n_col
   n0 <- split_data$n0
-  if (n0 > 0) {
-    out <- rbind(out, split_data$data_comp)
-  }
-  
-  # Impute data.
   n1 <- split_data$n1
-  if (n1 > 0) {
-    data_imp <- WorkResp(split_data$data_incomp, theta$mean, theta$cov)
-    out <- rbind(out, data_imp)
-  }
-  
-  # Empty data.
   n2 <- split_data$n2
-  if (n2 > 0) {
-    data_empty <- matrix(data = theta$mean, nrow = n2, ncol = d, byrow = TRUE)
-    out <- rbind(out, data_empty)
-  }
-  
-  # Restore initial order. 
-  init_order <- split_data$init_order
-  out <- out[order(init_order), , drop = FALSE]
-  
-  # Output
-  rownames(out) <- split_data$orig_row_names
-  colnames(out) <- split_data$orig_col_names
-  return(out)
+
+  out <- list(
+    data_comp    = if (n0 > 0) split_data$data_comp else matrix(NA, 0L, d),
+    data_incomp  = if (n1 > 0) WorkResp(split_data$data_incomp, theta$mean, theta$cov) else matrix(NA, 0L, d),
+    data_empty   = if (n2 > 0) matrix(theta$mean, n2, d, byrow = TRUE) else matrix(NA, 0L, d)
+  )
+  split_out <- split_data
+  split_out$data_comp   <- out$data_comp
+  split_out$data_incomp <- out$data_incomp
+  split_out$data_empty  <- out$data_empty
+  ReconstituteData(split_out)
 }
 
 
@@ -355,7 +331,8 @@ MVNMissImpute <- function(
 #'
 #' @param data Numeric data matrix.
 #' @param init_mean Optional initial mean vector.
-#' @param fix_mean Fix the means to their starting value? Must initialize.
+#' @param fix_mean Fix the mean to its starting value? Initial values must be
+#'   provided if \code{TRUE}.
 #' @param init_cov Optional initial covariance matrix.
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
@@ -419,7 +396,8 @@ FitMVNMiss <- function(
 #'
 #' @param data Numeric data matrix.
 #' @param init_mean Optional initial mean vector.
-#' @param fix_mean Fix the mean to its starting value? Must initialize. 
+#' @param fix_mean Fix the mean to its starting value? Initial values must be
+#'   provided if \code{TRUE}. 
 #' @param init_cov Optional initial covariance matrix.
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.

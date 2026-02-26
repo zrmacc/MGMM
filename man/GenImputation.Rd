@@ -2,18 +2,25 @@
 % Please edit documentation in R/09_Imputation.R
 \name{GenImputation}
 \alias{GenImputation}
-\title{Generate Imputation}
+\title{Generate Stochastic Imputation}
 \usage{
 GenImputation(fit)
 }
 \arguments{
-\item{fit}{Fitted model.}
+\item{fit}{Fitted model of class \code{mvn} or \code{mix} (e.g. from
+\code{\link{FitGMM}}).}
 }
 \value{
-Numeric matrix with missing values imputed.
+Numeric matrix with the same dimensions as \code{fit@Data}, with
+  missing values imputed. If the fitted data have no missing values, returns
+  the original data unchanged.
 }
 \description{
-Generates a stochastic imputation of a data set from a fitted data set.
+Generates a single stochastic imputation of the data from a fitted GMM.
+Observed values are unchanged; missing values are drawn from the conditional
+distribution given the observed data (or from the marginal distribution for
+fully missing rows). For multiple imputation, call this function repeatedly
+and combine results using \code{\link{CombineMIs}}.
 }
 \examples{
 set.seed(100)

@@ -19,5 +19,5 @@ MixUpdateMeans(split_data, means, covs, gamma)
 List containing the updated component means.
 }
 \description{
-Mean Update for Mixture of MVNs with Missingness.
+Paper eq. (7): μ_j^(r+1) = (1/n_j) Σ_i γ_ij ŷ_ij (responsibility-weighted average of working responses).
 }

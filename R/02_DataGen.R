@@ -5,7 +5,7 @@
 #'
 #' Generates an \eqn{n\times d} matrix of multivariate normal random vectors
 #' with observations (examples) as rows. If \eqn{k=1}, all observations belong to the same
-#' cluster. If \eqn{k>1} the observations are generated via two-step procedure.
+#' cluster. If \eqn{k>1} the observations are generated via a two-step procedure.
 #' First, the cluster membership is drawn from a multinomial distribution, with
 #' mixture proportions specified by \code{pi}. Conditional on cluster
 #' membership, the observation is drawn from a multivariate normal distribution,

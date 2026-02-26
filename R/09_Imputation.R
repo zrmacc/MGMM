@@ -4,11 +4,12 @@
 # -----------------------------------------------------------------------------
 
 #' Impute Empty
-#' 
-#' Generates an imputation for the empty cases.
-#' 
-#' @param split_data Split
-#' @param fit Fitted model.
+#'
+#' Generates a stochastic imputation for rows with all values missing (empty
+#' cases), by drawing from the fitted model.
+#'
+#' @param split_data List returned by \code{\link{PartitionData}}.
+#' @param fit Fitted \code{mvn} or \code{mix} object.
 #' @return Numeric matrix.
 #' @noRd
 
@@ -85,12 +86,13 @@ CalcCondDist <- function(y, idx_a, idx_b, mu, sigma) {
 # -----------------------------------------------------------------------------
 
 #' Impute Incomplete
-#' 
-#' Generates an imputation for the incomplete cases. The imputation is
-#' conditional on the observed data. 
-#' 
-#' @param split_data Split
-#' @param fit Fitted model.
+#'
+#' Generates a stochastic imputation for rows with some (but not all) values
+#' missing. For each such row, missing elements are drawn from the conditional
+#' distribution given the observed elements under the fitted model.
+#'
+#' @param split_data List returned by \code{\link{PartitionData}}.
+#' @param fit Fitted \code{mvn} or \code{mix} object.
 #' @return Numeric matrix.
 #' @noRd
 
@@ -148,12 +150,19 @@ ImputeIncomplete <- function(split_data, fit) {
 
 # -----------------------------------------------------------------------------
 
-#' Generate Imputation
-#' 
-#' Generates a stochastic imputation of a data set from a fitted data set.
-#' 
-#' @param fit Fitted model.
-#' @return Numeric matrix with missing values imputed.
+#' Generate Stochastic Imputation
+#'
+#' Generates a single stochastic imputation of the data from a fitted GMM.
+#' Observed values are unchanged; missing values are drawn from the conditional
+#' distribution given the observed data (or from the marginal distribution for
+#' fully missing rows). For multiple imputation, call this function repeatedly
+#' and combine results using \code{\link{CombineMIs}}.
+#'
+#' @param fit Fitted model of class \code{mvn} or \code{mix} (e.g. from
+#'   \code{\link{FitGMM}}).
+#' @return Numeric matrix with the same dimensions as \code{fit@Data}, with
+#'   missing values imputed. If the fitted data have no missing values, returns
+#'   the original data unchanged.
 #' @export 
 #' @examples
 #' set.seed(100)
@@ -195,13 +204,15 @@ GenImputation <- function(fit) {
 # -----------------------------------------------------------------------------
 
 #' Combine Multiple Imputations
-#' 
-#' Combines point estimates and standard errors across multiple imputations.
-#' 
-#' @param points List of point estimates, potentially vector valued. 
-#' @param covs List of sampling covariances, potentially matrix valued.
-#' @return List containing the final point estimate (`point`) and 
-#'   sampling covariance (`cov`).
+#'
+#' Combines point estimates and their estimated sampling (co)variances across
+#' multiple imputations using the usual multiple-imputation combining rules.
+#'
+#' @param points List of point estimates (each may be a vector or scalar).
+#' @param covs List of estimated sampling covariance matrices (or variances
+#'   for scalar estimates), one per imputation.
+#' @return List containing the combined point estimate (\code{point}) and
+#'   the combined sampling covariance (\code{cov}).
 #' @export
 #' @examples 
 #' set.seed(100)

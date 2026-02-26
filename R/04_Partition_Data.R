@@ -3,11 +3,12 @@
 
 
 #' Partition Data by Missingness Pattern
-#' 
-#' Returns a list with the input data split in separate matrices for complete
-#' cases, incomplete cases, and empty cases.
-#' 
-#' @param data Data.frame.
+#'
+#' Splits the input data into complete cases, incomplete cases (at least one
+#' missing value), and empty cases (all values missing). Useful for custom
+#' workflows or inspecting missingness patterns.
+#'
+#' @param data A numeric matrix or data frame (coerced to matrix).
 #' @return List containing:
 #' \itemize{
 #'   \item The original row and column names: `orig_row_names`, `orig_col_names`.
@@ -23,7 +24,7 @@
 PartitionData <- function(data) {
   
   d <- ncol(data)
-  idx <- seq(1:nrow(data))
+  idx <- seq_len(nrow(data))
   is_comp <- stats::complete.cases(data)
   is_incomp <- !is_comp
   
@@ -71,11 +72,13 @@ PartitionData <- function(data) {
 
 
 #' Reconstitute Data
-#' 
-#' Reassembles a data matrix split by missingness pattern.
-#' 
-#' @param split_data Split data are returned by \code{\link{PartitionData}}.
-#' @return Numeric matrix.
+#'
+#' Reassembles a data matrix from the list returned by \code{\link{PartitionData}},
+#' restoring the original row order and dimension names.
+#'
+#' @param split_data List returned by \code{\link{PartitionData}}.
+#' @return Numeric matrix with the same dimensions and row order as the
+#'   original data passed to \code{\link{PartitionData}}.
 #' @export
 
 ReconstituteData <- function(split_data) {

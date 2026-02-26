@@ -11,6 +11,9 @@
 
 \item{...}{Unused.}
 }
+\value{
+List of estimated cluster mean vectors.
+}
 \description{
 Mean for Fitted GMM
 }

@@ -11,6 +11,9 @@
 
 \item{...}{Unused.}
 }
+\value{
+List of estimated cluster covariance matrices.
+}
 \description{
 Covariance for Fitted GMM
 }

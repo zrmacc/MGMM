@@ -204,12 +204,16 @@ MixResidOP <- function(
 #------------------------------------------------------------------------------
 
 #' EM Objective for a Gaussian Mixture Model
-#' 
-#' @param cluster_sizes Cluster sizes.
-#' @param pi Cluster proportions
-#' @param covs List of component covariances. 
-#' @param resid_ops List of residual outer products.
-#' @return Numeric objective value.
+#'
+#' Evaluates the ECM objective Q in paper eq. (6): Q = Σ_j n_j ln π_j
+#' - (1/2) Σ_j n_j ln det(Σ_j) - (1/2) Σ_j tr(Σ_j^{-1} V̂_j). Stored value is 2*Q
+#' so the scale matches the single-component (2 * log L) objective.
+#'
+#' @param cluster_sizes Cluster sizes n_j = Σ_i γ_ij.
+#' @param pi Cluster proportions.
+#' @param covs List of component covariances.
+#' @param resid_ops List of working residual outer products V̂_j.
+#' @return Numeric objective value (2*Q).
 #' @noRd
 
 MixEMObj <- function(
@@ -218,25 +222,17 @@ MixEMObj <- function(
   covs,
   resid_ops
 ) {
-  
-  # Pi term.
   k <- length(pi)
+  # Paper eq. (6): Q = Σ n_j ln π_j - (1/2) Σ n_j ln det(Σ_j) - (1/2) Σ tr(Σ_j^{-1} V̂_j).
   pi_term <- sum(cluster_sizes * log(pi))
-  
-  # Determinant term.
-  det_term <- lapply(1:k, function(j) {
+  det_term <- sum(vapply(seq_len(k), function(j) {
     cluster_sizes[j] * matDet(covs[[j]], logDet = TRUE)
-  })
-  det_term <- do.call(sum, det_term)
-  
-  # Trace term.
-  trace_term <- lapply(1:k, function(j) {
+  }, 0.0))
+  trace_term <- sum(vapply(seq_len(k), function(j) {
     tr(MMP(matInv(covs[[j]]), resid_ops[[j]]))
-  })
-  trace_term <- do.call(sum, trace_term)
-  
-  # Objective.
-  obj <- pi_term - det_term - trace_term
+  }, 0.0))
+  # Return 2*Q to match single-component scale (2 * log L).
+  obj <- 2 * pi_term - det_term - trace_term
   return(obj)
 }
 
@@ -244,7 +240,9 @@ MixEMObj <- function(
 #------------------------------------------------------------------------------
 
 #' Mean Update for Mixture of MVNs with Missingness.
-#' 
+#'
+#' Paper eq. (7): μ_j^(r+1) = (1/n_j) Σ_i γ_ij ŷ_ij (responsibility-weighted average of working responses).
+#'
 #' @param split_data Data partitioned by missingness.
 #' @param means List of component means.
 #' @param covs List of component covariances.
@@ -301,16 +299,17 @@ MixUpdateMeans <- function(
 
 #------------------------------------------------------------------------------
 
-#' Parameter Update for Mixutre of MVNs with Missingness. 
+#' Parameter Update for Mixture of MVNs with Missingness. 
 #' 
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the current `means`, `covs`, `pi`, and `gamma`.
-#' @param fix_means Fix the mean to its starting value? Must initialize. 
+#' @param fix_means Fix the means to their starting values? Initial values must
+#'   be provided if \code{TRUE}. 
 #' @param lambda Optional ridge term added to covariance matrix to ensure 
 #'   positive definiteness.
 #' @return List containing:
 #' \itemize{
-#'   \item The updated `mean`, `cov`, `pi`, and `gamma`.
+#'   \item The updated `means`, `covs`, `pi`, and `gamma`.
 #'   \item The initial `old_obj` and final `new_obj` EM objective. 
 #'   \item The increase in the EM objective `delta`. 
 #' }
@@ -384,7 +383,7 @@ MixUpdate <- function(
     return(new_cov)
   })
   
-  ## Update responsibilities
+  ## Update responsibilities (paper eq. (8): γ(r+1) given μ(r+1), Σ(r+1), π(r)).
   new_gamma <- Responsibility(
     split_data,
     new_means,
@@ -392,12 +391,13 @@ MixUpdate <- function(
     old_pi
   )
   
-  # Update cluster proportions.
-  new_pi <- old_cluster_sizes / sum(old_cluster_sizes)
+  ## Update cluster proportions (paper: π(r+1)_j = n(r+1)_j / n).
+  new_cluster_sizes <- MixClusterSizes(split_data, new_gamma)
+  new_pi <- new_cluster_sizes / sum(new_cluster_sizes)
   
-  # New EM objective. 
+  ## New ECM objective Q(r+1) at (π(r+1), θ(r+1)) per paper eq. (6).
   new_obj <- MixEMObj(
-    old_cluster_sizes,
+    new_cluster_sizes,
     new_pi,
     new_covs,
     new_resid_ops
@@ -421,7 +421,7 @@ MixUpdate <- function(
 
 #------------------------------------------------------------------------------
 
-#' Cluster Assignment for Mixutre of MVNs with Missingness. 
+#' Cluster Assignment for Mixture of MVNs with Missingness. 
 #' 
 #' @param split_data Data partitioned by missingness.
 #' @param theta List containing the current `means`, `covs`, `pi`, and `gamma`.
@@ -517,57 +517,34 @@ MixClusterAssign <- function(
 #'   imputed to their expectations. 
 #' @noRd
 
-MixImpute <- function(
-  split_data,
-  theta
-) {
-  
-  # Unpack.
+MixImpute <- function(split_data, theta) {
   n0 <- split_data$n0
   n1 <- split_data$n1
   n2 <- split_data$n2
-  d <- split_data$n_col 
+  d <- split_data$n_col
   k <- theta$gamma$k
-  
-  # Output structure. 
-  out <- matrix(NA, nrow = 0, ncol = d)
-  
-  ## Complete cases. 
-  if (n0 > 0) {
-    out <- rbind(out, split_data$data_comp)
-  }
-  
-  ## Incomplete cases. 
+
+  data_comp <- if (n0 > 0) split_data$data_comp else matrix(NA, 0L, d)
+
   if (n1 > 0) {
-    data_imp <- lapply(seq_len(k), function(j) {
-      working_response <- WorkResp(
-        split_data$data_incomp,
-        theta$means[[j]],
-        theta$covs[[j]],
-        theta$gamma$gamma1[, j]
-      )
-      return(working_response)
-    })
-    data_imp <- Reduce("+", data_imp)
-    out <- rbind(out, data_imp)
+    data_incomp <- Reduce("+", lapply(seq_len(k), function(j) {
+      WorkResp(split_data$data_incomp, theta$means[[j]], theta$covs[[j]], theta$gamma$gamma1[, j])
+    }))
+  } else {
+    data_incomp <- matrix(NA, 0L, d)
   }
-  
-  ## Empty cases. 
+
   if (n2 > 0) {
-    data_imp <- lapply(seq_len(k), function(j) {
-      return(theta$means[[j]] * theta$pi[j])
-    })
-    data_imp <- Reduce("+", data_imp)
-    data_imp <- matrix(data = data_imp, nrow = n2, ncol = d, byrow = TRUE)
-    out <- rbind(out, data_imp)
+    data_empty <- matrix(Reduce("+", lapply(seq_len(k), function(j) theta$means[[j]] * theta$pi[j])), n2, d, byrow = TRUE)
+  } else {
+    data_empty <- matrix(NA, 0L, d)
   }
-  
-  # Output.
-  init_order <- split_data$init_order
-  out <- out[order(init_order), , drop = FALSE]
-  rownames(out) <- split_data$orig_row_names
-  colnames(out) <- split_data$orig_col_names
-  return(out)
+
+  split_out <- split_data
+  split_out$data_comp <- data_comp
+  split_out$data_incomp <- data_incomp
+  split_out$data_empty <- data_empty
+  ReconstituteData(split_out)
 }
 
 #------------------------------------------------------------------------------
@@ -619,7 +596,7 @@ FitMix <- function(
     lambda = lambda
   )
 
-  # Maximzation.
+  # Maximization.
   Update <- function(theta) {MixUpdate(split_data, theta, fix_means, lambda)}
   theta1 <- Maximization(theta0, Update, maxit, eps, report)
 

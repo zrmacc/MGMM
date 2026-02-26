@@ -2,7 +2,7 @@
 % Please edit documentation in R/01_Class.R
 \name{print.mix}
 \alias{print.mix}
-\title{Print for Fitted GMM}
+\title{Print Fitted GMM}
 \usage{
 \method{print}{mix}(x, ...)
 }
@@ -10,6 +10,9 @@
 \item{x}{A \code{mix} object.}
 
 \item{...}{Unused.}
+}
+\value{
+Invisibly returns \code{x}.
 }
 \description{
 Print method for objects of class \code{mix}.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/01_Class.R
 \name{logLik.mvn}
 \alias{logLik.mvn}
-\title{Log likelihood for Fitted MVN Model}
+\title{Log-Likelihood for Fitted MVN Model}
 \usage{
 \method{logLik}{mvn}(object, ...)
 }
@@ -11,6 +11,10 @@
 
 \item{...}{Unused.}
 }
+\value{
+Numeric scalar (the stored EM objective).
+}
 \description{
-Log likelihood for Fitted MVN Model
+Returns the final EM objective; for models with missing data this is not
+the exact log-likelihood of the observed data.
 }

@@ -1,3 +1,19 @@
-^RMAUC\.Rproj$
+# IDE and project
+^.*\.Rproj$
 ^\.Rproj\.user$
-README
+^\.Rhistory$
+^\.DS_Store$
+^\.lintr$
+
+# Git and CI (exclude from package tarball)
+^\.github$
+^\.gitignore$
+
+# README build artifacts
+^README\.Rmd$
+^README\.cache$
+^README_cache$
+^README\.html$
+
+# Legacy vignette source (PDF now in inst/doc)
+^vignettes/MGMM\.Rnw$

@@ -2,20 +2,21 @@
 % Please edit documentation in R/08_Clustering.R
 \name{CalHar}
 \alias{CalHar}
-\title{Calinski-Harabaz Index}
+\title{Calinski-Harabasz Index}
 \usage{
 CalHar(data, assign, means)
 }
 \arguments{
-\item{data}{Observations.}
+\item{data}{Numeric matrix of observations.}
 
-\item{assign}{Assignments.}
+\item{assign}{Vector of cluster assignments.}
 
-\item{means}{List of cluster means.}
+\item{means}{List of cluster mean vectors.}
 }
 \value{
-Scalar metric.
+Numeric scalar; higher values indicate better separation.
 }
 \description{
-Calculates the Calinski-Harabaz index.
+Calculates the Calinski-Harabasz index (ratio of between-cluster to
+within-cluster dispersion; higher values indicate better separation).
 }

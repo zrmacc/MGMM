@@ -7,15 +7,17 @@
 DavBou(data, assign, means)
 }
 \arguments{
-\item{data}{Observations}
+\item{data}{Numeric matrix of observations.}
 
-\item{assign}{Assignments}
+\item{assign}{Vector of cluster assignments.}
 
-\item{means}{List of cluster means}
+\item{means}{List of cluster mean vectors.}
 }
 \value{
-Scalar index.
+Numeric scalar; lower values indicate better separation.
 }
 \description{
-Calculates the Davies-Bouldin index.
+Calculates the Davies-Bouldin index (average similarity between each
+cluster and its most similar counterpart; lower values indicate better
+separation).
 }

@@ -7,7 +7,7 @@
 PartitionData(data)
 }
 \arguments{
-\item{data}{Data.frame.}
+\item{data}{A numeric matrix or data frame (coerced to matrix).}
 }
 \value{
 List containing:
@@ -22,6 +22,7 @@ List containing:
 }
 }
 \description{
-Returns a list with the input data split in separate matrices for complete
-cases, incomplete cases, and empty cases.
+Splits the input data into complete cases, incomplete cases (at least one
+missing value), and empty cases (all values missing). Useful for custom
+workflows or inspecting missingness patterns.
 }

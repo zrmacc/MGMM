@@ -11,6 +11,9 @@
 
 \item{...}{Unused.}
 }
+\value{
+The estimated mean vector.
+}
 \description{
 Mean for Fitted MVN Model
 }

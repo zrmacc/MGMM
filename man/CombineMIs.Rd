@@ -7,16 +7,18 @@
 CombineMIs(points, covs)
 }
 \arguments{
-\item{points}{List of point estimates, potentially vector valued.}
+\item{points}{List of point estimates (each may be a vector or scalar).}
 
-\item{covs}{List of sampling covariances, potentially matrix valued.}
+\item{covs}{List of estimated sampling covariance matrices (or variances
+for scalar estimates), one per imputation.}
 }
 \value{
-List containing the final point estimate (`point`) and 
-  sampling covariance (`cov`).
+List containing the combined point estimate (\code{point}) and
+  the combined sampling covariance (\code{cov}).
 }
 \description{
-Combines point estimates and standard errors across multiple imputations.
+Combines point estimates and their estimated sampling (co)variances across
+multiple imputations using the usual multiple-imputation combining rules.
 }
 \examples{
 set.seed(100)

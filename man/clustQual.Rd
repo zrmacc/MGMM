@@ -15,10 +15,10 @@ List containing the cluster quality metrics.
 \description{
 Evaluates cluster quality. Returns the following metrics:
 \itemize{
-\item BIC: Bayesian Information Criterion, lower value indicates better clustering quality.
-\item CHI: Calinski-Harabaz Index, higher value indicates better clustering quality.
-\item DBI: Davies-Bouldin, lower value indicates better clustering quality.
-\item SIL: Silhouette Width, higher value indicates better clustering quality.
+\item BIC: Bayesian Information Criterion; lower is better.
+\item CHI: Calinski-Harabasz index; higher is better.
+\item DBI: Davies-Bouldin index; lower is better.
+\item SIL: Mean silhouette width; higher is better.
 }
 }
 \examples{

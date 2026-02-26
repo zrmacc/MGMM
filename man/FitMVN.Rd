@@ -20,7 +20,8 @@ FitMVN(
 
 \item{init_mean}{Optional initial mean vector.}
 
-\item{fix_mean}{Fix the mean to its starting value? Must initialize.}
+\item{fix_mean}{Fix the mean to its starting value? Initial values must be
+provided if \code{TRUE}.}
 
 \item{init_cov}{Optional initial covariance matrix.}
 

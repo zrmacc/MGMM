@@ -1,0 +1,13 @@
+# R and IDE
+.Rhistory
+.RData
+.Rproj.user
+*.Rproj
+
+# README build
+README_cache/
+README.html
+README.Rmd
+
+# Optional: uncomment to avoid committing large or generated files
+# inst/doc/

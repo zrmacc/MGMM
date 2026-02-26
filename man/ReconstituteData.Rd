@@ -7,11 +7,13 @@
 ReconstituteData(split_data)
 }
 \arguments{
-\item{split_data}{Split data are returned by \code{\link{PartitionData}}.}
+\item{split_data}{List returned by \code{\link{PartitionData}}.}
 }
 \value{
-Numeric matrix.
+Numeric matrix with the same dimensions and row order as the
+  original data passed to \code{\link{PartitionData}}.
 }
 \description{
-Reassembles a data matrix split by missingness pattern.
+Reassembles a data matrix from the list returned by \code{\link{PartitionData}},
+restoring the original row order and dimension names.
 }

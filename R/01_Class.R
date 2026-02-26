@@ -29,10 +29,14 @@ methods::setClass(
 )
 
 
-#' Log likelihood for Fitted MVN Model
+#' Log-Likelihood for Fitted MVN Model
+#'
+#' Returns the final EM objective; for models with missing data this is not
+#' the exact log-likelihood of the observed data.
 #'
 #' @param object A \code{mvn} object.
 #' @param ... Unused.
+#' @return Numeric scalar (the stored EM objective).
 #' @export
 
 logLik.mvn <- function(object, ...) {
@@ -45,6 +49,7 @@ logLik.mvn <- function(object, ...) {
 #'
 #' @param x A \code{mvn} object.
 #' @param ... Unused.
+#' @return The estimated mean vector.
 #' @export
 
 mean.mvn <- function(x, ...) {
@@ -52,10 +57,11 @@ mean.mvn <- function(x, ...) {
 }
 
 
-#' Print for Fitted MVN Model
+#' Print Fitted MVN Model
 #'
 #' @param x A \code{mvn} object.
 #' @param ... Unused.
+#' @return Invisibly returns \code{x}.
 #' @export
 
 print.mvn <- function(x, ...) {
@@ -86,6 +92,7 @@ print.mvn <- function(x, ...) {
 #'
 #' @param object A \code{mvn} object.
 #' @param ... Unused.
+#' @return The estimated covariance matrix.
 #' @export
 
 vcov.mvn <- function(object, ...) {
@@ -142,10 +149,14 @@ methods::setClass(
   )
 
 
-#' Log likelihood for Fitted GMM
+#' Log-Likelihood for Fitted GMM
+#'
+#' Returns the final EM objective; for models with missing data this is not
+#' the exact log-likelihood of the observed data.
 #'
 #' @param object A \code{mix} object.
 #' @param ... Unused.
+#' @return Numeric scalar (the stored EM objective).
 #' @export
 
 logLik.mix <- function(object, ...) {
@@ -158,18 +169,20 @@ logLik.mix <- function(object, ...) {
 #'
 #' @param x A \code{mix} object.
 #' @param ... Unused.
+#' @return List of estimated cluster mean vectors.
 #' @export
 
 mean.mix <- function(x, ...) {
   return(x@Means)
 }
 
-#' Print for Fitted GMM
+#' Print Fitted GMM
 #'
 #' Print method for objects of class \code{mix}.
 #'
 #' @param x A \code{mix} object.
 #' @param ... Unused.
+#' @return Invisibly returns \code{x}.
 #' @export
 
 print.mix <- function(x, ...) {
@@ -198,6 +211,7 @@ print.mix <- function(x, ...) {
 #'
 #' @param object A \code{mix} object.
 #' @param ... Unused.
+#' @return List of estimated cluster covariance matrices.
 #' @export
 
 vcov.mix <- function(object, ...) {

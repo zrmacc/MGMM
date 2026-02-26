@@ -5,11 +5,14 @@
 # Responsibilities
 #-------------------------------------------------------------------------------
 
-#' Evaluate the Density of an Incomplete Observations
-#' 
+#' Evaluate the Density of an Incomplete Observation
+#'
+#' Computes the marginal density of the observed elements under the mixture
+#' model for a single observation vector that may contain missing values.
+#'
 #' @param y Vector with missing elements.
 #' @param means List of mean vectors.
-#' @param covs List of covariances matrices.
+#' @param covs List of covariance matrices.
 #' @param pi Vector of cluster proportions.
 #' @return Numeric density of observed elements.
 #' @noRd
@@ -43,12 +46,12 @@ EvalDensIncompObs <- function(
 
 #' Responsibilities
 #'
-#' Calculates the posterior probability of cluster membership given the observed
-#' data.
+#' Posterior probability of cluster j for observation i given observed data;
+#' paper eq. (3) and (8): γ_ij = f(y_obs|μ_j, Σ_j) π_j / Σ_l f(y_obs|μ_l, Σ_l) π_l.
 #'
 #' @param split_data Data partitioned by missingness.
 #' @param means List of mean vectors.
-#' @param covs List of covariances matrices.
+#' @param covs List of covariance matrices.
 #' @param pi Vector of cluster proportions.
 #' @return List containing:
 #' \itemize{
@@ -78,54 +81,28 @@ Responsibility <- function(
   out <- list()
   out$k <- k
 
-  # Multivariate normal density evaluation for complete observations.
   if (n0 > 0) {
-    dens_eval0 <- lapply(seq_len(k), function(j) {
-      mvnfast::dmvn(
-        X = split_data$data_comp,
-        mu = means[[j]],
-        sigma = covs[[j]]) * pi[j]
-      }
-    )
-    dens_eval0 <- do.call(cbind, dens_eval0)
-
-    # Normalize by row.
-    gamma0 <- plyr::aaply(
-      .data = dens_eval0, 
-      .margins = 1, 
-      .fun = function(x) {x / sum(x)}, 
-      .drop = FALSE
-    )
-    
-    # Format.
+    dens_eval0 <- do.call(cbind, lapply(seq_len(k), function(j) {
+      mvnfast::dmvn(X = split_data$data_comp, mu = means[[j]], sigma = covs[[j]]) * pi[j]
+    }))
+    gamma0 <- sweep(dens_eval0, 1L, rowSums(dens_eval0), "/")
     colnames(dens_eval0) <- colnames(gamma0) <- paste0("k", seq_len(k))
     rownames(dens_eval0) <- rownames(gamma0) <- seq_len(n0)
     out$dens_eval0 <- dens_eval0
     out$gamma0 <- gamma0
   }
 
-  # Evaluation for Incomplete observations.
   if (n1 > 0) {
     data_incomp <- split_data$data_incomp
-    rownames(data_incomp) = NULL
+    rownames(data_incomp) <- NULL
     dens_eval1 <- plyr::aaply(
-      .data = data_incomp,
-      .margins = 1,
-      .fun = function(x){EvalDensIncompObs(x, means, covs, pi)},
+      .data = data_incomp, .margins = 1L,
+      .fun = function(x) EvalDensIncompObs(x, means, covs, pi),
       .drop = FALSE
     )
-
-    # Normalize.
-    gamma1 <- plyr::aaply(
-      .data = dens_eval1, 
-      .margins = 1, 
-      .fun = function(x) {x / sum(x)}, 
-      .drop = FALSE
-    )
-    
-    # Format.
-    colnames(dens_eval1) <- colnames(gamma1) <- paste0("k", seq(1:k))
-    rownames(dens_eval1) <- rownames(gamma1) <- seq(1:n1)
+    gamma1 <- sweep(dens_eval1, 1L, rowSums(dens_eval1), "/")
+    colnames(dens_eval1) <- colnames(gamma1) <- paste0("k", seq_len(k))
+    rownames(dens_eval1) <- rownames(gamma1) <- seq_len(n1)
     out$dens_eval1 <- dens_eval1
     out$gamma1 <- gamma1
   }
@@ -139,14 +116,17 @@ Responsibility <- function(
 #-------------------------------------------------------------------------------
 
 #' Working Response Vector
-#' 
-#' Calculate the working response vector for a single example.
+#'
+#' Working response ŷ_ij per paper eq. (4): (y_obs, E[y_miss | z_ij=1, y_obs]),
+#' with E[y_miss | ...] = μ_miss + Σ_miss,obs Σ_obs,obs^{-1} (y_obs - μ_obs).
 #' 
 #' @param y Vector with missing elements.
 #' @param mean Numeric mean.
 #' @param cov Numeric covariance.
-#' @param gamma Numeric vector of responsibilities.
-#' @return Numeric working response vector. 
+#' @param gamma Numeric scalar; responsibility (posterior probability) for
+#'   this observation under the given component.
+#' @return Numeric working response vector (observed elements unchanged;
+#'   missing elements filled with conditional expectation). 
 #' @noRd
 
 WorkRespIndiv <- function(
@@ -161,20 +141,20 @@ WorkRespIndiv <- function(
   is_obs <- !is_mis
   if (!any(is_mis)) {return(y)}
   
-  # Permutation to place observed elements first.
+  # Permutation to place observed elements first (paper: y_obs then y_miss).
   perm <- c(which(is_obs), which(is_mis))
   rev_perm <- order(perm)
   
-  # Partition covariance.
+  # Partition covariance: Σ_obs,obs, Σ_miss,obs per paper eq. (4).
   cov_mis_obs <- cov[is_mis, is_obs, drop = FALSE]
-  var_mis_mis <- cov[is_obs, is_obs, drop = FALSE]
-  var_mis_mis_inv <- matInv(var_mis_mis)
+  var_obs_obs <- cov[is_obs, is_obs, drop = FALSE]
+  var_obs_obs_inv <- matInv(var_obs_obs)
   
   # Observed components.
   obs_ele <- matrix(y[is_obs], ncol = 1)
   
-  # Conditional expectation of missing components.
-  mis_ele <- mean[is_mis] + MMP(cov_mis_obs, MMP(var_mis_mis_inv, obs_ele - mean[is_obs]))
+  # Conditional expectation of missing given observed: μ_miss + Σ_miss,obs Σ_obs,obs^{-1} (y_obs - μ_obs).
+  mis_ele <- mean[is_mis] + MMP(cov_mis_obs, MMP(var_obs_obs_inv, obs_ele - mean[is_obs]))
   
   # Working response.
   working_response <- rbind(obs_ele, mis_ele)
@@ -192,9 +172,10 @@ WorkRespIndiv <- function(
 #' @param data_incomp Incomplete observations.
 #' @param mean Numeric mean.
 #' @param cov Numeric covariance.
-#' @param gamma Numeric vector of responsibilities.
-#' @return Numeric vector, the responsibility-weighted cumulative working
-#'   response vector.
+#' @param gamma Numeric vector of responsibilities (one per row of
+#'   \code{data_incomp}); if \code{NULL}, defaults to 1 for each row.
+#' @return Numeric matrix with the same dimensions as \code{data_incomp};
+#'   missing elements are filled with conditional expectations.
 #' @noRd
 
 WorkResp <- function(
@@ -227,16 +208,16 @@ WorkResp <- function(
 
 #' Expected Residual Outer Product
 #'
-#' Calculates the expected residual outer product.
+#' Working residual outer product per paper eq. (5): γ_ij [ (ŷ_ij - μ_j)(ŷ_ij - μ_j)'
+#' + (0 0; 0 Λ^{-1}_{j,TT}) ], where Λ^{-1} is the conditional covariance of missing
+#' given observed (Schur complement).
 #'
 #' @param data_incomp Data for observations with missingness.
-#' @param new_mean New mean.
-#' @param old_mean Initial mean.
-#' @param old_cov Initial covariance.
-#' @param gamma Responsibilities.
-#'
-#' @return Numeric matrix, the responsibility-weighted, cumulative,
-#'  expected residual outer product.
+#' @param new_mean New mean μ_j (used in residual).
+#' @param old_mean Previous mean (used for conditional expectation).
+#' @param old_cov Previous covariance (used for working response and Schur complement).
+#' @param gamma Responsibilities γ_ij.
+#' @return Numeric matrix, the responsibility-weighted sum of working residual outer products.
 #' @noRd
 
 ExpResidOP <- function(
@@ -246,65 +227,36 @@ ExpResidOP <- function(
   old_cov, 
   gamma = NULL
 ) {
-  
-  # Dimensions.
   d <- ncol(data_incomp)
   n <- nrow(data_incomp)
-
-  # Responsibilities
   if (is.null(gamma)) {
     gamma <- rep(1, n)
   }
 
   out <- lapply(seq_len(n), function(i) {
-    
-    # Current observation.
     y <- data_incomp[i, ]
     is_mis <- is.na(y)
     is_obs <- !is_mis
-    
-    # Permutation.
     perm <- c(which(is_obs), which(is_mis))
     rev_perm <- order(perm)
     n_obs <- sum(is_obs)
-    
-    # Partition covariance.
+
     var_mis_mis <- old_cov[is_mis, is_mis, drop = FALSE]
     cov_mis_obs <- old_cov[is_mis, is_obs, drop = FALSE]
     var_obs_obs <- old_cov[is_obs, is_obs, drop = FALSE]
-    
-    # Inverses.
     var_obs_obs_inv <- matInv(var_obs_obs)
-    pre_mis_mis_inv <- SchurC(var_mis_mis, var_obs_obs, cov_mis_obs)
-    
-    # Observed components.
+    # Conditional covariance of missing given observed (Schur complement) = Λ^{-1} in paper eq. (5).
+    cond_cov_miss <- SchurC(var_mis_mis, var_obs_obs, cov_mis_obs)
+
     obs_ele <- matrix(y[is_obs], ncol = 1)
-    
-    # Conditional expectation of missing components.
     miss_ele <- old_mean[is_mis] + MMP(cov_mis_obs, MMP(var_obs_obs_inv, obs_ele - old_mean[is_obs]))
-    
-    # Working response.
     working_response <- rbind(obs_ele, miss_ele)
-    
-    # Residual.
     residual <- working_response - new_mean[perm]
-    
-    # Residual outer product.
     resid_OP <- matOP(residual, residual)
-    
-    # Add correction.
     idx <- seq(from = n_obs + 1, to = d)
-    resid_OP[idx, idx] <- resid_OP[idx, idx] + pre_mis_mis_inv
-    
-    # Recover initial order.
+    resid_OP[idx, idx] <- resid_OP[idx, idx] + cond_cov_miss
     resid_OP <- resid_OP[rev_perm, rev_perm]
-    
-    # Return.
-    out <- gamma[i] * resid_OP
-    return(out)
+    gamma[i] * resid_OP
   })
-  out <- Reduce("+", out)
-  
-  # Output.
-  return(out)
+  Reduce("+", out)
 }

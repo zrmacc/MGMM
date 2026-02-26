@@ -1,7 +1,22 @@
-# Missingness Aware Gaussian Mixture Models
+---
+title: "README"
+author: "Zachary McCaw"
+date: "2026-02-26"
+output: 
+  html_document: 
+    keep_md: TRUE
+--- 
+
+
+
+# Missingness-Aware Gaussian Mixture Models
 
 Zachary McCaw <br>
-Updated: 2021-12-14
+Updated: 2026-02-26
+
+[![R-CMD-check](https://github.com/zrmacc/MGMM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/zrmacc/MGMM/actions/workflows/R-CMD-check.yaml)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/MGMM)](https://cran.r-project.org/package=MGMM)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/MGMM)](https://CRAN.R-project.org/package=MGMM)
 
 This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
 
@@ -192,6 +207,13 @@ head(imp)
 ## 2 -1.3476380 -1.51915826
 ```
 
-## Vignette
+## Documentation
 
-Additional examples and details may be found [here](https://github.com/zrmacc/MGMM/tree/master/vignettes/Vignette.pdf).
+A detailed write-up with derivations and examples (LaTeX-compiled PDF) is installed with the package. After installing MGMM, open it from R with:
+
+```r
+doc_path <- system.file("doc", "Documentation.pdf", package = "MGMM")
+if (nzchar(doc_path)) utils::browseURL(doc_path)
+```
+
+Or from a shell: open the file at the path returned by `system.file("doc", "Documentation.pdf", package = "MGMM")`.
