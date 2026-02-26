@@ -1,14 +1,3 @@
----
-title: "README"
-author: "Zachary McCaw"
-date: "2026-02-26"
-output: 
-  html_document: 
-    keep_md: TRUE
---- 
-
-
-
 # Missingness-Aware Gaussian Mixture Models
 
 Zachary McCaw <br>
