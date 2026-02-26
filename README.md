@@ -198,4 +198,4 @@ head(imp)
 
 ## Documentation
 
-A detailed write-up with derivations and examples (LaTeX-compiled PDF) is [here](https://github.com/zrmacc/MGMM/blob/main/inst/doc/Documentation.pdf).
+A detailed write-up with derivations and examples (LaTeX-compiled PDF) is [here](https://github.com/zrmacc/MGMM/blob/master/inst/doc/Documentation.pdf).
