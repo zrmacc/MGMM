@@ -198,11 +198,4 @@ head(imp)
 
 ## Documentation
 
-A detailed write-up with derivations and examples (LaTeX-compiled PDF) is installed with the package. After installing MGMM, open it from R with:
-
-```r
-doc_path <- system.file("doc", "Documentation.pdf", package = "MGMM")
-if (nzchar(doc_path)) utils::browseURL(doc_path)
-```
-
-Or from a shell: open the file at the path returned by `system.file("doc", "Documentation.pdf", package = "MGMM")`.
+A detailed write-up with derivations and examples (LaTeX-compiled PDF) is [here](https://github.com/zrmacc/MGMM/blob/main/inst/doc/Documentation.pdf).

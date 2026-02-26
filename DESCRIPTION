@@ -33,5 +33,6 @@ Suggests:
     rmarkdown,
     withr
 VignetteBuilder: knitr
+Config/build/clean-inst-doc: false
 RoxygenNote: 7.3.3
 Config/testthat/edition: 3
