@@ -2,7 +2,7 @@ Package: MGMM
 Title: Missingness-Aware Gaussian Mixture Models
 Date: 2026-02-26
 Version: 1.0.1.3
-Author: Zachary McCaw [aut, cre]
+Author: Zachary McCaw [aut, cre] (ORCID: <https://orcid.org/0000-0002-2006-9828>)
 Maintainer: Zachary McCaw <zmccaw@alumni.harvard.edu>
 Authors@R:
     person(

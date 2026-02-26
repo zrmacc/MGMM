@@ -13,7 +13,7 @@ This package performs estimation and inference for Gaussian Mixture Models (GMMs
 * Calculation of cluster membership probabilities and maximum a posteriori classification of the input vectors. 
 * Deterministic completion of the input data, by imputing missing elements to their posterior means, and stochastic completion of the input data, by drawing missing elements from the fitted GMM.
 
-The method is detailed in [Fitting Gaussian mixture models on incomplete data](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9158227/).
+The method is detailed in [Fitting Gaussian mixture models on incomplete data](https://pmc.ncbi.nlm.nih.gov/articles/PMC9158227/).
 
 ## Main Functions
 

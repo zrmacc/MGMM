@@ -1,0 +1,108 @@
+---
+title: "Missingness-Aware Gaussian Mixture Models"
+author: "Zachary McCaw"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Missingness-Aware Gaussian Mixture Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  cache = TRUE
+)
+library(MGMM)
+```
+
+# Introduction
+
+This package performs estimation and inference for Gaussian Mixture Models (GMMs) where the input data may contain missing values. Rather than imputing missing values before fitting the GMM, this package uses an extended EM algorithm to obtain the true maximum likelihood estimates of all model parameters given the observed data. In particular `MGMM` performs the following tasks:
+
+* Maximum likelihood estimation of cluster means, covariances, and proportions.
+* Calculation of cluster membership probabilities and maximum a posteriori classification of the input vectors.
+* Deterministic completion of the input data, by imputing missing elements to their posterior means, and stochastic completion of the input data, by drawing missing elements from the fitted GMM.
+
+The method is detailed in [Fitting Gaussian mixture models on incomplete data](https://pmc.ncbi.nlm.nih.gov/articles/PMC9158227/).
+
+## Main Functions
+
+* `FitGMM` estimates model parameters, performs classification and imputation.
+* `rGMM` simulates observations from a GMM, potentially with missingness.
+* `ChooseK` provides guidance on choosing the number of clusters.
+* `GenImputation` performs stochastic imputation for multiple imputation-based inference.
+
+## Compact Example
+
+```{r compact-example}
+set.seed(101)
+library(MGMM)
+
+# Parameter settings.
+mean_list <- list(
+  c(1, 1),
+  c(-1, -1)
+)
+cov_list <- list(
+  matrix(c(1, -0.5, -0.5, 1), nrow = 2),
+  matrix(c(1, 0.5, 0.5, 1), nrow = 2)
+)
+
+# Generate data.
+data <- rGMM(
+  n = 1e3,
+  d = 2,
+  k = 2,
+  miss = 0.1,
+  means = mean_list,
+  covs = cov_list
+)
+
+# Original data.
+head(data)
+
+# Choose cluster number.
+choose_k <- ChooseK(
+  data,
+  k0 = 2,
+  k1 = 4,
+  boot = 10,
+  maxit = 10,
+  eps = 1e-4,
+  report = TRUE
+)
+
+# Cluster number recommendations.
+show(choose_k$Choices)
+
+# Estimation.
+fit <- FitGMM(
+  data,
+  k = 2,
+  maxit = 10
+)
+
+# Estimated means.
+show(fit@Means)
+
+# Estimated covariances.
+show(fit@Covariances)
+
+# Cluster assignments.
+head(fit@Assignments)
+
+# Deterministic imputation.
+head(fit@Completed)
+
+# Stochastic imputation.
+imp <- GenImputation(fit)
+head(imp)
+```
+
+## Documentation
+
+A detailed write-up with derivations and examples is available [here](https://github.com/zrmacc/MGMM/blob/master/inst/doc/Documentation.pdf).
